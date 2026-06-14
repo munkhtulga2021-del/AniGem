@@ -3,7 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AniGem - Аниме & Манга</title>
+<title>AniGem - Аниме & Манга үнэгүй үзэх</title>
+<meta name="description" content="AniGem - Монгол хэлээр аниме, манга үнэгүй онлайн үзэх сайт. Шинэ ангиуд, шилдэг аниме, манга цуглуулга.">
+<meta name="keywords" content="AniGem, anime, манга, аниме үзэх, манга унших, anime монгол">
+<meta property="og:title" content="AniGem - Аниме & Манга үнэгүй үзэх">
+<meta property="og:description" content="Монгол хэлээр аниме, манга үнэгүй онлайн үзэх сайт.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎬</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@600;700;800;900&display=swap" rel="stylesheet">
@@ -61,14 +67,22 @@ img{user-select:none;}
 .nav-r{margin-left:auto;display:flex;align-items:center;gap:10px;}
 .lang-btn{background:var(--glass2);color:#fff;border:1px solid var(--border2);padding:8px 13px;border-radius:11px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;transition:.2s;white-space:nowrap;}
 .lang-btn:hover{border-color:var(--accent);background:rgba(168,85,247,0.12);}
-.shop-btn{background:var(--glass2);color:#fff;border:1px solid var(--border2);padding:8px 13px;border-radius:11px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;transition:.2s;white-space:nowrap;}
+.shop-btn{background:var(--glass2);color:#fff;border:1px solid var(--border2);padding:8px 13px;border-radius:11px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;transition:.2s;white-space:nowrap;display:flex;align-items:center;gap:6px;justify-content:center;}
 .shop-btn:hover{border-color:var(--gold);background:rgba(251,191,36,0.12);}
+.shop-emoji{font-size:14px;line-height:1;}
 .notif-btn{position:relative;background:var(--glass2);color:#fff;border:1px solid var(--border2);width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;transition:.2s;flex-shrink:0;font-family:inherit;}
 .notif-btn:hover{border-color:var(--accent);background:rgba(168,85,247,0.12);}
 .notif-badge{position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;font-size:9px;font-weight:800;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 3px;line-height:1;}
 .notif-item{padding:12px 14px;background:var(--glass2);border-radius:14px;margin-bottom:10px;border:1px solid var(--border);font-size:12px;line-height:1.5;}
 .notif-item.unread{border-color:var(--accent);background:rgba(168,85,247,0.08);}
 .notif-time{font-size:10px;color:var(--text2);margin-top:5px;}
+.leaderboard-item{display:flex;align-items:center;gap:12px;padding:11px 14px;background:var(--glass2);border-radius:14px;margin-bottom:8px;border:1px solid var(--border);}
+.leaderboard-rank{font-size:15px;font-weight:800;width:30px;text-align:center;flex-shrink:0;}
+.leaderboard-avatar{width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;}
+.leaderboard-avatar-ph{width:36px;height:36px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;flex-shrink:0;color:var(--text-on-accent);}
+.leaderboard-info{flex:1;min-width:0;}
+.leaderboard-name{font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.leaderboard-minutes{font-size:11px;color:var(--text2);}
 .shop-ov{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:600;display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:.25s;}
 .shop-ov.on{opacity:1;visibility:visible;}
 .shop-box{background:var(--bg2);border:1px solid var(--border2);border-radius:18px;padding:24px;max-width:420px;width:92%;max-height:85vh;overflow-y:auto;position:relative;}
@@ -203,7 +217,7 @@ img{user-select:none;}
 /* ===== PROFILE ===== */
 .profile-header{background:linear-gradient(135deg,#1c1033,#0d1430);padding:34px 24px;display:flex;align-items:center;gap:22px;position:relative;overflow:hidden;}
 .profile-header::after{content:'';position:absolute;inset:0;background:radial-gradient(60% 100% at 0% 0%,rgba(168,85,247,0.2),transparent 60%);}
-.profile-header.fire-bg{animation:fireBorder 2.2s ease-in-out infinite;}
+.fire-bg{animation:fireBorder 2.2s ease-in-out infinite;}
 @keyframes fireBorder{
   0%,100%{box-shadow:0 0 24px 5px rgba(255,90,0,0.5),0 0 50px 14px rgba(255,40,0,0.22);}
   50%{box-shadow:0 0 42px 10px rgba(255,170,0,0.85),0 0 75px 20px rgba(255,70,0,0.4);}
@@ -220,7 +234,7 @@ img{user-select:none;}
 .avatar-zoom-ov.on img{transform:scale(1);}
 .profile-info{position:relative;z-index:1;}
 .profile-info .p-name{font-family:'Unbounded',sans-serif;font-size:21px;font-weight:700;margin-bottom:3px;}
-.profile-info .p-name.fire-name{
+.fire-name{
   background:linear-gradient(90deg,#ff3d00,#ffd200,#ff6a00,#ff0040,#ffd200,#ff3d00);
   background-size:300% 100%;
   -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
@@ -404,6 +418,7 @@ img{user-select:none;}
 /* ===== PAGE ===== */
 .page{display:none;}
 .page.on{display:block;animation:fade .3s;}
+#fans-page.on{animation:pop .35s cubic-bezier(.2,.8,.3,1);transform-origin:center center;}
 
 /* ===== SKELETON / SPIN / TOAST ===== */
 .sk{min-width:150px;width:150px;border-radius:14px;overflow:hidden;background:var(--bg2);border:1px solid var(--border);flex-shrink:0;}
@@ -438,9 +453,21 @@ img{user-select:none;}
   .op-inner{padding:16px 20px;gap:14px;}
   .op-title{font-size:20px;}
   .op-cover{width:80px;height:116px;}
-  .grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:11px;}
-  .card,.sk{min-width:130px;width:130px;}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(95px,1fr));gap:9px;}
+  .card,.sk{min-width:105px;width:105px;}
+  .card-body{padding:7px 8px;}
+  .card-title{font-size:11px;}
   .ep-grid{grid-template-columns:1fr;}
+  .logo{font-size:16px;gap:6px;}
+  .nav-r{gap:6px;}
+  .notif-btn{width:34px;height:34px;font-size:13px;}
+  .shop-btn{width:34px;height:34px;padding:0;border-radius:11px;}
+  .shop-label{display:none;}
+  .lang-btn{padding:7px 9px;font-size:11px;}
+  .nav-avatar,.nav-avatar-ph{width:34px;height:34px;}
+  .player-nav{gap:8px;padding:10px 12px;}
+  .player-icon-btn{width:32px;height:32px;font-size:13px;}
+  .p-close{padding:8px 11px;font-size:12px;}
 }
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
 </style>
@@ -470,9 +497,10 @@ img{user-select:none;}
     <button class="adv-toggle" onclick="toggleAdvSearch()" id="adv-toggle-btn" title="Advanced search">⚙️</button>
   </div>
   <div class="nav-r" id="nav-r">
+    <button class="notif-btn" onclick="openTopFans()">🏆</button>
     <button class="notif-btn" onclick="openNotifications()">🔔<span class="notif-badge" style="display:none;">0</span></button>
-    <button class="shop-btn" onclick="openShop()" data-i18n="shop_title">🛍️ Дэлгүүр</button>
-    <button class="lang-btn" onclick="toggleLang()" id="lang-btn">EN</button>
+    <button class="shop-btn" onclick="openShop()"><span class="shop-emoji">🛍️</span><span class="shop-label" data-i18n="shop_label">Дэлгүүр</span></button>
+    <button class="lang-btn" onclick="toggleLang()" id="lang-btn">MN</button>
     <button class="nav-btn" onclick="showLogin()" data-i18n="login_btn">Нэвтрэх</button>
   </div>
 </nav>
@@ -692,6 +720,16 @@ img{user-select:none;}
   <div id="admin-content"></div>
 </div>
 
+<!-- DONATE -->
+<div class="page" id="donate-page">
+  <div id="donate-content"></div>
+</div>
+
+<!-- TOP FANS -->
+<div class="page" id="fans-page">
+  <div id="fans-content"></div>
+</div>
+
 <!-- NOTIFICATIONS -->
 <div class="shop-ov" id="notif-ov" onclick="closeNotifOut(event)">
   <div class="shop-box">
@@ -776,6 +814,7 @@ img{user-select:none;}
     <div class="player-title" id="player-title">...</div>
     <button class="player-icon-btn" onclick="openComments()" title="Comments">💬</button>
     <button class="player-icon-btn" onclick="openReport(curAnime&&curAnime.id, curAnime&&curAnime.title)" title="Report">📢</button>
+    <a class="p-close" id="yt-watch-link" href="#" target="_blank" rel="noopener" style="text-decoration:none;display:inline-block;">▶ YouTube</a>
     <button class="p-close" onclick="closePlayer()" data-i18n="btn_close">✕</button>
   </div>
   <div style="flex:1;display:flex;flex-direction:column;">
@@ -839,7 +878,7 @@ var STRINGS = {
     signup_submit:'Бүртгүүлэх', ph_name:'Таны нэр',
     lf1:'Watchlist хадгалах', lf2:'Уншсан манга', lf3:'Үзсэн аниме',
     skip:'Одоохондоо алгасах →',
-    sec_trending:'🔥 Trending', sec_top:'⭐ Шилдэг', sec_history:'📺 Үргэлжлүүлэн үзэх', sec_rec:'🎯 Танд санал болгох', sec_search:'🔍 Хайлт', genre_all:'Бүгд',
+    sec_trending:'🔥 Trending', sec_top:'⭐ Шилдэг', sec_history:'📺 Үргэлжлүүлэн үзэх', sec_rec:'🎯 Танд санал болгох', sec_search:'🔍 Хайлт', sec_top_fans:'🏆 Шилдэг үзэгчид', genre_all:'Бүгд',
     sec_anime_title:'🎬 Үзэж болох аниме (Muse Asia)', sec_browse:'📂 Бүх аниме',
     sec_manga_featured:'⭐ ОНЦЛОХ', sec_manga_trending:'🔥 Trending Манга', sec_manga_top:'⭐ Шилдэг Манга', sec_manhwa:'📖 Манхва',
     sec_wl:'❤️ Миний жагсаалт', wl_empty:'Жагсаалт хоосон',
@@ -877,7 +916,7 @@ var STRINGS = {
     photo_updated:'Профайл зураг шинэчлэгдлээ 📷', photo_err_type:'Зурган файл сонгоно уу.', photo_err_size:'Файлын хэмжээ 5MB-аас бага байх ёстой.', change_photo:'Зураг солих',
     no_results:'Уучлаарай, одоогоор байхгүй байна 😔',
     adv_all_genre:'Бүх төрөл', adv_all_format:'Бүх формат', adv_all_year:'Бүх он',
-    shop_title:'🛍️ Дэлгүүр', your_points:'Оноо',
+    shop_title:'🛍️ Дэлгүүр', shop_label:'Дэлгүүр', your_points:'Оноо',
     item_noads:'1 сар Ads-чөлөөтэй', item_firename:'🔥 Галт нэр', item_firebg:'🔥 Галт фон', item_glitterid:'💎 Гялбаа ID',
     buy_btn:'Авах', owned:'✓ Эзэмшсэн', active_until:'хүртэл идэвхтэй',
     not_enough_points:'Оноо хүрэхгүй байна 😢', purchase_success:'Амжилттай авлаа! 🎉',
@@ -907,6 +946,22 @@ var STRINGS = {
     notif_report_resolved:'Таны "{type}" төрлийн тайлан шийдвэрлэгдлээ ✓',
     notif_gift:'Чи "{item}" авлаа! 🎁',
     notif_referral:'Найз чинь баталгаажсан тул чи +10 оноо авлаа! 🎉',
+    admin_announce_title:'📢 Бүх хэрэглэгчид мэдэгдэл илгээх',
+    admin_announce_ph:'Мэдэгдлийн текстээ бичнэ үү...',
+    admin_announce_send:'Илгээх', announce_sent:'Мэдэгдэл бүх хэрэглэгчид илгээгдлээ! 📨',
+    fans_minutes_watched:'мин үзсэн', top_fans_empty:'Одоогоор хэрэглэгч байхгүй',
+    donate_title:'💝 Дэмжих', donate_btn:'💝 Хандив өгөх',
+    donate_desc:'$1 хандив = 100 оноо. Доорх мэдээллээр шилжүүлэг хийгээд, хэдэн доллар илгээсэнээ бичээд мэдэгдээрэй. Admin шалгасны дараа оноо автоматаар нэмэгдэнэ.',
+    donate_info_title:'🏦 Шилжүүлэх мэдээлэл',
+    donate_amount_label:'Илгээсэн дүн ($)', donate_amount_ph:'Жишээ: 5',
+    donate_note_ph:'Тэмдэглэл (нэр, гүйлгээний утга бичсэн эсэх г.м)',
+    donate_submit:'Илгээсэн гэж мэдэгдэх',
+    donate_sent:'Хүсэлт илгээгдлээ! Admin шалгасны дараа оноо нэмэгдэнэ. 🙏',
+    donate_invalid:'Зөв дүн оруулна уу',
+    my_donations:'📋 Миний хандивууд', no_donations:'Хандив байхгүй',
+    donation_status_pending:'🟡 Хүлээгдэж буй', donation_status_approved:'✓ Баталгаажсан',
+    admin_donations:'💝 Хандивууд', donation_approve_pts:'оноо',
+    notif_donation_approved:'Таны ${amount} хандив баталгаажиж, +{pts} оноо нэмэгдлээ! 🎉',
     footer:'AniGem © 2026 · AniList · MangaDex · Muse Asia'
   },
   en: {
@@ -920,7 +975,7 @@ var STRINGS = {
     signup_submit:'Sign Up', ph_name:'Your name',
     lf1:'Save watchlist', lf2:'Manga read', lf3:'Anime watched',
     skip:'Skip for now →',
-    sec_trending:'🔥 Trending', sec_top:'⭐ Top Rated', sec_history:'📺 Continue Watching', sec_rec:'🎯 Recommended for You', sec_search:'🔍 Search results', genre_all:'All',
+    sec_trending:'🔥 Trending', sec_top:'⭐ Top Rated', sec_history:'📺 Continue Watching', sec_rec:'🎯 Recommended for You', sec_search:'🔍 Search results', sec_top_fans:'🏆 Top Fans', genre_all:'All',
     sec_anime_title:'🎬 Watchable Anime (Muse Asia)', sec_browse:'📂 All Anime',
     sec_manga_featured:'⭐ FEATURED', sec_manga_trending:'🔥 Trending Manga', sec_manga_top:'⭐ Top Manga', sec_manhwa:'📖 Manhwa',
     sec_wl:'❤️ My Watchlist', wl_empty:'Watchlist is empty',
@@ -958,7 +1013,7 @@ var STRINGS = {
     photo_updated:'Profile photo updated 📷', photo_err_type:'Please choose an image file.', photo_err_size:'File must be smaller than 5MB.', change_photo:'Change photo',
     no_results:'Sorry, not available right now 😔',
     adv_all_genre:'All Genres', adv_all_format:'All Formats', adv_all_year:'All Years',
-    shop_title:'🛍️ Shop', your_points:'Points',
+    shop_title:'🛍️ Shop', shop_label:'Shop', your_points:'Points',
     item_noads:'1 Month Ad-Free', item_firename:'🔥 Fire Name', item_firebg:'🔥 Fire Background', item_glitterid:'💎 Glitter ID',
     buy_btn:'Buy', owned:'✓ Owned', active_until:'active until',
     not_enough_points:'Not enough points 😢', purchase_success:'Purchased successfully! 🎉',
@@ -988,6 +1043,22 @@ var STRINGS = {
     notif_report_resolved:'Your "{type}" report has been resolved ✓',
     notif_gift:'You received "{item}"! 🎁',
     notif_referral:'Your friend verified — you earned +10 points! 🎉',
+    admin_announce_title:'📢 Send Announcement to All Users',
+    admin_announce_ph:'Write your announcement...',
+    admin_announce_send:'Send', announce_sent:'Announcement sent to all users! 📨',
+    fans_minutes_watched:'min watched', top_fans_empty:'No users yet',
+    donate_title:'💝 Donate', donate_btn:'💝 Donate',
+    donate_desc:'$1 donation = 100 points. Transfer using the info below, then submit how many dollars you sent. The admin will verify and add points.',
+    donate_info_title:'🏦 Transfer Info',
+    donate_amount_label:'Amount sent ($)', donate_amount_ph:'e.g. 5',
+    donate_note_ph:'Note (your name, transfer reference, etc.)',
+    donate_submit:'Notify admin',
+    donate_sent:'Request sent! Points will be added after admin verification. 🙏',
+    donate_invalid:'Please enter a valid amount',
+    my_donations:'📋 My Donations', no_donations:'No donations yet',
+    donation_status_pending:'🟡 Pending', donation_status_approved:'✓ Approved',
+    admin_donations:'💝 Donations', donation_approve_pts:'points',
+    notif_donation_approved:'Your ${amount} donation was approved — +{pts} points! 🎉',
     footer:'AniGem © 2026 · AniList · MangaDex · Muse Asia'
   }
 };
@@ -1017,6 +1088,49 @@ function applyTheme(name) {
   r.setProperty('--text-on-accent', th.text || '#fff');
   localStorage.setItem('as_theme', name);
   document.querySelectorAll('.theme-dot').forEach(function(d){ d.classList.toggle('on', d.dataset.theme===name); });
+}
+
+function updateLeaderboardEntry() {
+  if (!currentUser) return;
+  var totalSec = 0;
+  Object.keys(watchStats).forEach(function(k){ totalSec += watchStats[k].totalSec || 0; });
+  var totalMin = Math.floor(totalSec/60);
+  db.collection('leaderboard').doc(currentUser.uid).set({
+    name: currentUser.displayName || currentUser.email || '',
+    photoURL: currentUserPhoto || null,
+    userId: currentUserId,
+    totalMinutes: totalMin
+  }).then(function(){ renderTopFans(); }).catch(function(){});
+}
+
+function openTopFans(){ goPage('fans'); }
+
+function renderTopFans() {
+  var el = document.getElementById('fans-content');
+  if (!el) return;
+  var header = '<div class="admin-header fire-bg" style="justify-content:center;position:relative;"><button class="admin-back" style="position:absolute;left:22px;" onclick="goPage(\'home\')">'+t('back_profile')+'</button><div class="at fire-name">🔥 '+t('sec_top_fans')+' 🔥</div></div>';
+  el.innerHTML = header+'<div style="padding:20px;"><div class="spin-wrap"><div class="spin"></div></div></div>';
+  db.collection('leaderboard').get().then(function(snap){
+    var list = [];
+    snap.forEach(function(doc){ list.push(doc.data()); });
+    list.sort(function(a,b){ return (b.totalMinutes||0) - (a.totalMinutes||0); });
+    list = list.filter(function(u){ return (u.totalMinutes||0) > 0; }).slice(0,10);
+    var html = '<div style="padding:20px;max-width:600px;margin:0 auto;">';
+    if (list.length === 0) {
+      html += '<div class="admin-empty-small">'+t('top_fans_empty')+'</div>';
+    } else {
+      var medals = ['🥇','🥈','🥉'];
+      html += list.map(function(u,i){
+        var rank = medals[i] || (i+1)+'.';
+        var avatar = u.photoURL ? '<img class="leaderboard-avatar" src="'+u.photoURL+'">' : '<div class="leaderboard-avatar-ph">'+((u.name||'?').charAt(0).toUpperCase())+'</div>';
+        return '<div class="leaderboard-item"><div class="leaderboard-rank">'+rank+'</div>'+avatar+
+          '<div class="leaderboard-info"><div class="leaderboard-name id-glitter">'+escapeHtml(u.name||t('unnamed_user'))+'</div>'+
+          '<div class="leaderboard-minutes">'+(u.totalMinutes||0)+' '+t('fans_minutes_watched')+'</div></div></div>';
+      }).join('');
+    }
+    html += '</div>';
+    el.innerHTML = header + html;
+  }).catch(function(err){ el.innerHTML = header+'<div style="padding:20px;"><div class="admin-empty-small">'+err.message+'</div></div>'; });
 }
 
 // ==================== HORIZONTAL ROW SCROLL ====================
@@ -1067,6 +1181,7 @@ function applyLanguage() {
   if (document.getElementById('admin-page').classList.contains('on')) renderAdmin();
   if (document.getElementById('shop-ov').classList.contains('on')) renderShopContent();
   if (document.getElementById('notif-ov').classList.contains('on')) renderNotifications();
+  if (document.getElementById('fans-page').classList.contains('on')) renderTopFans();
   if (document.getElementById('report-ov').classList.contains('on')) renderReportContent();
   if (document.getElementById('comments-drawer').classList.contains('on') && curAnime) loadComments(curAnime.id);
   if (curAnime) {
@@ -1188,6 +1303,12 @@ var SHOP_ITEMS = {
   fireName: { cost: 25000, key:'fireName' },
   fireBg:   { cost: 25000, key:'fireBg' },
   glitterId:{ cost: 20000, key:'glitterId' }
+};
+// ⚠️ EDIT THIS with your real bank / QPay info:
+var DONATION_INFO = {
+  bankName: 'ХХБ (TDB)',
+  accountNumber: '320004000404287623',
+  accountHolder: 'Munkhtulga Bilguunsaikhan'
 };
 
 function formatUserId(n) {
@@ -1352,7 +1473,7 @@ function saveUserData() {
       watchedAnime: watchHistory,
       points: userPoints,
       lastActive: new Date().toISOString()
-    }, { merge: true }).catch(function(err){ console.error('saveUserData', err); });
+    }, { merge: true }).then(function(){ updateLeaderboardEntry(); }).catch(function(err){ console.error('saveUserData', err); });
   }, 800);
 }
 
@@ -1389,17 +1510,18 @@ function endWatchSession() {
 
 function updateNavUser() {
   var nr = document.getElementById('nav-r');
+  var fansBtn = '<button class="notif-btn" onclick="openTopFans()">🏆</button>';
   var notifBtn = '<button class="notif-btn" onclick="openNotifications()">🔔<span class="notif-badge" style="display:none;">0</span></button>';
-  var shopBtn = '<button class="shop-btn" onclick="openShop()">'+t('shop_title')+'</button>';
-  var langBtn = '<button class="lang-btn" onclick="toggleLang()" id="lang-btn">'+(lang==='mn'?'EN':'MN')+'</button>';
+  var shopBtn = '<button class="shop-btn" onclick="openShop()"><span class="shop-emoji">🛍️</span><span class="shop-label">'+t('shop_label')+'</span></button>';
+  var langBtn = '<button class="lang-btn" onclick="toggleLang()" id="lang-btn">'+(lang==='mn'?'MN':'EN')+'</button>';
   if (currentUser) {
     var initials = (currentUser.displayName || currentUser.email || '?').charAt(0).toUpperCase();
     var avatarHTML = currentUserPhoto
       ? '<img class="nav-avatar" src="'+currentUserPhoto+'" onclick="goPage(\'profile\')">'
       : '<div class="nav-avatar-ph" onclick="goPage(\'profile\')">'+initials+'</div>';
-    nr.innerHTML = notifBtn + shopBtn + langBtn + avatarHTML;
+    nr.innerHTML = fansBtn + notifBtn + shopBtn + langBtn + avatarHTML;
   } else {
-    nr.innerHTML = notifBtn + shopBtn + langBtn + '<button class="nav-btn" onclick="showLogin()" data-i18n="login_btn">'+t('login_btn')+'</button>';
+    nr.innerHTML = fansBtn + notifBtn + shopBtn + langBtn + '<button class="nav-btn" onclick="showLogin()" data-i18n="login_btn">'+t('login_btn')+'</button>';
   }
   updateNotifBadge();
 }
@@ -1454,6 +1576,8 @@ function notifMessage(n) {
     return t('notif_gift').replace('{item}', itemLabels[d.itemKey]||'?');
   }
   if (n.type === 'referral') return t('notif_referral');
+  if (n.type === 'announcement') return '📢 ' + escapeHtml(d.text || '');
+  if (n.type === 'donation_approved') return t('notif_donation_approved').replace('{amount}', d.amountUsd).replace('{pts}', d.points);
   return '';
 }
 
@@ -1574,8 +1698,8 @@ function renderMyReports() {
       var statusCls = r.status==='resolved' ? 'resolved' : 'open';
       var statusLabel = r.status==='resolved' ? t('report_status_resolved') : t('report_status_open');
       return '<div class="report-mini-item"><div class="rmi-top"><span>'+(typeLabels[r.type]||'?')+'</span><span class="report-status '+statusCls+'">'+statusLabel+'</span></div>'+
-        (r.animeTitle ? '<div class="rmi-meta">🎬 '+r.animeTitle+'</div>' : '')+
-        (r.text ? '<div style="font-size:11px;">'+r.text+'</div>' : '')+
+        (r.animeTitle ? '<div class="rmi-meta">🎬 '+escapeHtml(r.animeTitle)+'</div>' : '')+
+        (r.text ? '<div style="font-size:11px;">'+escapeHtml(r.text)+'</div>' : '')+
         '<div class="rmi-meta" style="margin-top:4px;">'+new Date(r.createdAt).toLocaleString(locale)+'</div></div>';
     }).join('');
   }).catch(function(err){ el.innerHTML = '<div class="admin-empty-small">'+err.message+'</div>'; });
@@ -1602,10 +1726,10 @@ function loadComments(animeId) {
     listEl.innerHTML = comments.map(function(c){
       var canDel = currentUser && (currentUser.uid === c.uid || isAdmin);
       return '<div class="comment-item"><div class="ci-top"><div class="comment-user">'+
-        (c.userPhoto ? '<img src="'+c.userPhoto+'" style="width:22px;height:22px;border-radius:50%;object-fit:cover;">' : '👤')+
-        ' <span>'+(c.userName||'?')+'</span></div>'+
+        (c.userPhoto ? '<img src="'+escapeHtml(c.userPhoto)+'" style="width:22px;height:22px;border-radius:50%;object-fit:cover;">' : '👤')+
+        ' <span>'+escapeHtml(c.userName||'?')+'</span></div>'+
         (canDel ? '<button class="comment-del" onclick="deleteComment(\''+c.id+'\')">'+t('delete_comment')+'</button>' : '')+
-        '</div><div class="comment-text">'+c.text+'</div><div class="comment-time">'+new Date(c.createdAt).toLocaleString(locale)+'</div></div>';
+        '</div><div class="comment-text">'+escapeHtml(c.text)+'</div><div class="comment-time">'+new Date(c.createdAt).toLocaleString(locale)+'</div></div>';
     }).join('');
   }).catch(function(err){ listEl.innerHTML = '<div class="admin-empty-small">'+err.message+'</div>'; });
 }
@@ -1637,6 +1761,79 @@ function deleteComment(id) {
     if (curAnime) loadComments(curAnime.id);
   }).catch(function(err){ toast('Алдаа: '+err.message); });
 }
+
+// ==================== DONATE ====================
+function renderDonate() {
+  var el = document.getElementById('donate-content');
+  var header = '<div class="admin-header" style="justify-content:center;position:relative;"><button class="admin-back" style="position:absolute;left:22px;" onclick="goPage(\'home\')">'+t('back_profile')+'</button><div class="at">'+t('donate_title')+'</div></div>';
+  if (!currentUser) {
+    el.innerHTML = header+'<div style="padding:20px;text-align:center;">'+
+      '<div style="font-size:14px;color:var(--text2);margin-bottom:16px;">'+t('shop_login_required')+'</div>'+
+      '<button class="auth-submit" style="width:auto;padding:11px 26px;" onclick="showLogin();">'+t('login_signup_btn')+'</button>'+
+    '</div>';
+    return;
+  }
+  var html = '<div style="padding:20px;max-width:480px;margin:0 auto;">';
+  html += '<div style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:18px;text-align:center;">'+t('donate_desc')+'</div>';
+  html += '<div class="profile-section">';
+  html += '<div class="profile-section-title">'+t('donate_info_title')+'</div>';
+  html += '<div style="font-size:13px;line-height:2;">🏦 '+DONATION_INFO.bankName+'<br>💳 '+DONATION_INFO.accountNumber+'<br>👤 '+DONATION_INFO.accountHolder+'</div>';
+  html += '</div>';
+  html += '<div class="profile-section">';
+  html += '<div class="profile-section-title">'+t('donate_amount_label')+'</div>';
+  html += '<input type="number" id="donate-amount" min="0.5" step="0.5" placeholder="'+t('donate_amount_ph')+'" style="width:100%;background:var(--glass2);border:1px solid var(--border2);border-radius:10px;padding:10px 12px;color:var(--text);font-size:13px;font-family:inherit;margin-bottom:10px;">';
+  html += '<textarea class="report-textarea" id="donate-note" placeholder="'+t('donate_note_ph')+'"></textarea>';
+  html += '<button class="shop-buy-btn" style="width:100%;" onclick="submitDonation()">'+t('donate_submit')+'</button>';
+  html += '</div>';
+  html += '<div class="profile-section">';
+  html += '<div class="profile-section-title">'+t('my_donations')+'</div>';
+  html += '<div id="my-donations-list" class="report-mini-list"><div class="admin-empty-small">'+t('no_donations')+'</div></div>';
+  html += '</div>';
+  html += '</div>';
+  el.innerHTML = header + html;
+  renderMyDonations();
+}
+
+function submitDonation() {
+  if (!currentUser) return;
+  var amount = parseFloat(document.getElementById('donate-amount').value);
+  if (!amount || amount <= 0) { toast(t('donate_invalid')); return; }
+  var note = (document.getElementById('donate-note').value || '').trim();
+  db.collection('donations').add({
+    uid: currentUser.uid,
+    userName: currentUser.displayName || currentUser.email || '',
+    userEmail: currentUser.email || '',
+    amountUsd: amount,
+    note: note,
+    status: 'pending',
+    createdAt: new Date().toISOString()
+  }).then(function(){
+    toast(t('donate_sent'));
+    document.getElementById('donate-amount').value = '';
+    document.getElementById('donate-note').value = '';
+    renderMyDonations();
+  }).catch(function(err){ toast('Алдаа: '+err.message); });
+}
+
+function renderMyDonations() {
+  var el = document.getElementById('my-donations-list');
+  if (!el || !currentUser) return;
+  var locale = lang==='en' ? 'en-US' : 'mn-MN';
+  db.collection('donations').where('uid','==',currentUser.uid).get().then(function(snap){
+    var list = [];
+    snap.forEach(function(doc){ list.push(doc.data()); });
+    list.sort(function(a,b){ return new Date(b.createdAt) - new Date(a.createdAt); });
+    if (list.length === 0) { el.innerHTML = '<div class="admin-empty-small">'+t('no_donations')+'</div>'; return; }
+    el.innerHTML = list.map(function(d){
+      var statusCls = d.status==='approved' ? 'resolved' : 'open';
+      var statusLabel = d.status==='approved' ? t('donation_status_approved') : t('donation_status_pending');
+      return '<div class="report-mini-item"><div class="rmi-top"><span>$'+d.amountUsd+'</span><span class="report-status '+statusCls+'">'+statusLabel+'</span></div>'+
+        (d.note ? '<div style="font-size:11px;">'+escapeHtml(d.note)+'</div>' : '')+
+        '<div class="rmi-meta" style="margin-top:4px;">'+new Date(d.createdAt).toLocaleString(locale)+'</div></div>';
+    }).join('');
+  }).catch(function(err){ el.innerHTML = '<div class="admin-empty-small">'+err.message+'</div>'; });
+}
+
 function adminToggleBan(uid, currentlyBanned) {
   var msg = currentlyBanned ? t('confirm_unban') : t('confirm_ban');
   if (!confirm(msg)) return;
@@ -1808,7 +2005,7 @@ function renderProfile() {
   var hasFireName = isAdmin || !!userPurchases.fireName;
   var hasFireBg = isAdmin || !!userPurchases.fireBg;
   var hasGlitterId = isAdmin || !!userPurchases.glitterId;
-  var nameText = currentUser.displayName || t('unnamed_user');
+  var nameText = escapeHtml(currentUser.displayName) || t('unnamed_user');
   var nameDisplay = hasFireName ? '🔥 '+nameText+' 🔥' : nameText;
   var nameClass = hasFireName ? ' fire-name' : '';
   var idText = (currentUserId !== null && currentUserId !== undefined) ? formatUserId(currentUserId) : null;
@@ -1843,6 +2040,7 @@ function renderProfile() {
     '<div style="font-size:11px;color:var(--text2);margin-bottom:4px;">'+t('your_points')+'</div>'+
     '<div style="font-size:32px;font-weight:800;font-family:\'Unbounded\',sans-serif;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;">'+userPoints.toLocaleString()+'</div>'+
     '<button class="edit-btn" style="margin:10px auto 0;" onclick="openShop()">'+t('shop_title')+'</button>'+
+    '<button class="edit-btn" style="margin:8px auto 0;" onclick="goPage(\'donate\')">'+t('donate_btn')+'</button>'+
   '</div>';
 
   if (idText) {
@@ -1906,14 +2104,73 @@ function renderAdminReports() {
       var statusCls = r.status==='resolved' ? 'resolved' : 'open';
       var statusLabel = r.status==='resolved' ? t('report_status_resolved') : t('report_status_open');
       return '<div class="report-mini-item"><div class="rmi-top"><span>'+(typeLabels[r.type]||'?')+'</span><span class="report-status '+statusCls+'">'+statusLabel+'</span></div>'+
-        '<div class="rmi-meta">👤 '+(r.userName||'?')+' · '+(r.userEmail||'')+'</div>'+
-        (r.animeTitle ? '<div class="rmi-meta">🎬 '+r.animeTitle+'</div>' : '')+
-        (r.text ? '<div style="font-size:11px;margin:4px 0;">'+r.text+'</div>' : '')+
+        '<div class="rmi-meta">👤 '+escapeHtml(r.userName||'?')+' · '+escapeHtml(r.userEmail||'')+'</div>'+
+        (r.animeTitle ? '<div class="rmi-meta">🎬 '+escapeHtml(r.animeTitle)+'</div>' : '')+
+        (r.text ? '<div style="font-size:11px;margin:4px 0;">'+escapeHtml(r.text)+'</div>' : '')+
         '<div class="rmi-meta">'+new Date(r.createdAt).toLocaleString(locale)+'</div>'+
         (r.status!=='resolved' ? '<button class="admin-action-btn" style="margin-top:8px;" onclick="adminResolveReport(\''+r.id+'\',\''+r.uid+'\','+r.type+')">'+t('report_resolve')+'</button>' : '')+
       '</div>';
     }).join('');
   }).catch(function(err){ el.innerHTML = '<div class="admin-empty-small">'+err.message+'</div>'; });
+}
+
+function adminSendAnnouncement() {
+  var ta = document.getElementById('admin-announce-text');
+  var text = (ta.value || '').trim();
+  if (!text) return;
+  db.collection('users').get().then(function(snap){
+    var docs = [];
+    snap.forEach(function(doc){ docs.push(doc.id); });
+    var chunks = [];
+    for (var i=0; i<docs.length; i+=450) chunks.push(docs.slice(i,i+450));
+    var promises = chunks.map(function(chunk){
+      var batch = db.batch();
+      chunk.forEach(function(uid){
+        var ref = db.collection('notifications').doc();
+        batch.set(ref, { uid: uid, type:'announcement', data:{text:text}, read:false, createdAt:new Date().toISOString() });
+      });
+      return batch.commit();
+    });
+    Promise.all(promises).then(function(){
+      toast(t('announce_sent'));
+      ta.value = '';
+    }).catch(function(err){ toast('Алдаа: '+err.message); });
+  }).catch(function(err){ toast('Алдаа: '+err.message); });
+}
+
+function renderAdminDonations() {
+  var el = document.getElementById('admin-donations');
+  if (!el) return;
+  var locale = lang==='en' ? 'en-US' : 'mn-MN';
+  el.innerHTML = '<div class="spin-wrap"><div class="spin"></div></div>';
+  db.collection('donations').get().then(function(snap){
+    var list = [];
+    snap.forEach(function(doc){ var d=doc.data(); d.id=doc.id; list.push(d); });
+    list.sort(function(a,b){ return new Date(b.createdAt) - new Date(a.createdAt); });
+    if (list.length === 0) { el.innerHTML = '<div class="admin-empty-small">'+t('no_donations')+'</div>'; return; }
+    el.innerHTML = list.map(function(d){
+      var statusCls = d.status==='approved' ? 'resolved' : 'open';
+      var statusLabel = d.status==='approved' ? t('donation_status_approved') : t('donation_status_pending');
+      var pts = Math.round((d.amountUsd||0)*100);
+      return '<div class="report-mini-item"><div class="rmi-top"><span>$'+d.amountUsd+'</span><span class="report-status '+statusCls+'">'+statusLabel+'</span></div>'+
+        '<div class="rmi-meta">👤 '+escapeHtml(d.userName||'?')+' · '+escapeHtml(d.userEmail||'')+'</div>'+
+        (d.note ? '<div style="font-size:11px;margin:4px 0;">'+escapeHtml(d.note)+'</div>' : '')+
+        '<div class="rmi-meta">'+new Date(d.createdAt).toLocaleString(locale)+'</div>'+
+        (d.status!=='approved' ? '<button class="admin-action-btn" style="margin-top:8px;" onclick="adminApproveDonation(\''+d.id+'\',\''+d.uid+'\','+d.amountUsd+')">✓ +'+pts+' '+t('donation_approve_pts')+'</button>' : '')+
+      '</div>';
+    }).join('');
+  }).catch(function(err){ el.innerHTML = '<div class="admin-empty-small">'+err.message+'</div>'; });
+}
+
+function adminApproveDonation(id, uid, amountUsd) {
+  var pts = Math.round(amountUsd*100);
+  db.collection('donations').doc(id).set({ status:'approved' }, { merge:true })
+    .then(function(){
+      db.collection('users').doc(uid).set({ points: firebase.firestore.FieldValue.increment(pts) }, { merge: true });
+      db.collection('notifications').add({ uid: uid, type:'donation_approved', data:{amountUsd:amountUsd, points:pts}, read:false, createdAt:new Date().toISOString() }).catch(function(){});
+      renderAdminDonations();
+    })
+    .catch(function(err){ toast('Алдаа: '+err.message); });
 }
 
 function adminResolveReport(id, uid, reportType) {
@@ -1938,13 +2195,19 @@ function renderAdmin() {
   c.innerHTML = '<div class="admin-header"><div class="at">'+t('admin_dashboard')+'</div><button class="admin-back" onclick="goPage(\'profile\')">'+t('back_profile')+'</button></div>'+
     '<div class="admin-summary" id="admin-summary"><div class="spin-wrap"><div class="spin"></div></div></div>'+
     '<div class="admin-users" id="admin-countries" style="padding-top:0;"></div>'+
+    '<div class="admin-section-label" style="margin:18px 0 10px;font-size:14px;">'+t('admin_announce_title')+'</div>'+
+    '<div class="admin-users"><textarea class="report-textarea" id="admin-announce-text" placeholder="'+t('admin_announce_ph')+'" style="margin-bottom:10px;"></textarea>'+
+    '<button class="shop-buy-btn" onclick="adminSendAnnouncement()">'+t('admin_announce_send')+'</button></div>'+
     '<div class="admin-section-label" style="margin:18px 0 10px;font-size:14px;">'+t('admin_reports')+'</div>'+
     '<div class="admin-users" id="admin-reports"></div>'+
+    '<div class="admin-section-label" style="margin:18px 0 10px;font-size:14px;">'+t('admin_donations')+'</div>'+
+    '<div class="admin-users" id="admin-donations"></div>'+
     '<div class="admin-section-label" style="margin:18px 0 10px;font-size:14px;">'+t('total_users')+'</div>'+
     '<div class="admin-users" id="admin-users"></div>';
 
   var locale = lang==='en' ? 'en-US' : 'mn-MN';
   renderAdminReports();
+  renderAdminDonations();
 
   db.collection('users').get().then(function(snap) {
     var users = [];
@@ -1992,7 +2255,7 @@ function renderAdmin() {
         html += '<div class="admin-card">'+
           '<div class="admin-card-top">'+
             (u.photoURL ? '<img class="admin-avatar" src="'+u.photoURL+'" style="object-fit:cover;">' : '<div class="admin-avatar">'+initials+'</div>')+
-            '<div><div class="admin-card-name">'+(u.name||t('unnamed_user'))+(u.userId?' <span style="color:var(--text2);font-weight:600;">#'+formatUserId(u.userId)+'</span>':'')+'</div><div class="admin-card-email">'+u.email+'</div><div class="admin-card-meta">📅 '+joined+t('joined')+' · 🕐 '+lastActive+(u.country?' · '+countryFlag(u.countryCode)+' '+u.country:'')+'</div></div>'+
+            '<div><div class="admin-card-name">'+escapeHtml(u.name||t('unnamed_user'))+(u.userId?' <span style="color:var(--text2);font-weight:600;">#'+formatUserId(u.userId)+'</span>':'')+'</div><div class="admin-card-email">'+escapeHtml(u.email)+'</div><div class="admin-card-meta">📅 '+joined+t('joined')+' · 🕐 '+lastActive+(u.country?' · '+countryFlag(u.countryCode)+' '+escapeHtml(u.country):'')+'</div></div>'+
             (isMe ? '<div class="admin-badge-self">'+t('you_badge')+'</div>' : (u.banned ? '<div class="admin-badge-banned">'+t('banned_badge')+'</div>' : ''))+
           '</div>';
 
@@ -2179,6 +2442,7 @@ function setEp(idx) {
   var ep = curAnime.episodes[idx]; curEpIdx = idx;
   document.getElementById('player-title').textContent = curAnime.title + ' — ' + epTitle(ep.num, ep.title);
   document.getElementById('yt-frame').src = 'https://www.youtube.com/embed/' + ep.vid + '?autoplay=1&rel=0';
+  document.getElementById('yt-watch-link').href = 'https://www.youtube.com/watch?v=' + ep.vid;
   document.querySelectorAll('.ep-mini').forEach(function(el,i){ el.classList.toggle('on', i===idx); });
   startWatchSession(curAnime, ep);
 }
@@ -2361,7 +2625,7 @@ function openMangaModal(id) {
   }).catch(function(err){ console.error('openMangaModal',err); document.getElementById('modal-body').innerHTML='<div class="r-info">'+t('retry')+'</div>'; });
 }
 
-function closeModal(){document.getElementById('modal').classList.remove('on');}
+function closeModal(){document.getElementById('modal').classList.remove('on');document.getElementById('modal-body').innerHTML='';}
 function closeModalOut(e){if(e.target.id==='modal') closeModal();}
 
 // ==================== ONE PIECE ====================
@@ -2512,9 +2776,12 @@ function goPage(p) {
   if(p==='anime'){ renderAnimeEpGrid(); if(!animeBrowseLoaded){ animeBrowseLoaded=true; renderAnimeGenreBar(); loadAnimeBrowse(null); } }
   if(p==='profile') renderProfile();
   if(p==='admin') renderAdmin();
+  if(p==='fans') renderTopFans();
+  if(p==='donate') renderDonate();
 }
 
 // ==================== UTILS ====================
+function escapeHtml(s){ if(s==null) return ''; return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
 function toast(msg){var t=document.getElementById('toast-el');t.textContent=msg;t.classList.add('on');setTimeout(function(){t.classList.remove('on');},2500);}
 function GT(g){ if(lang==='en') return g; return {Action:'Экшн',Adventure:'Адал явдал',Comedy:'Инээдмийн',Drama:'Драм',Fantasy:'Фэнтэзи',Horror:'Аймшиг',Mystery:'Нууц',Romance:'Романс','Sci-Fi':'Шинжлэх ухаан','Slice of Life':'Амьдрал',Sports:'Спорт',Supernatural:'Ид шид',Thriller:'Триллер'}[g]||g; }
 
@@ -2529,6 +2796,7 @@ if (lang !== 'mn') applyLanguage();
 enableRowScroll();
 renderHistoryRow();
 renderRecommendations();
+renderTopFans();
 loadTrending();
 loadTop();
 // Анх ачаалахад auth төлөв тогтсоны дараа нэвтрээгүй бол login харуулах
