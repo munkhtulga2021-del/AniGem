@@ -660,10 +660,6 @@ img{user-select:none;}
 <!-- ANIME PAGE -->
 <div class="page" id="anime-page">
   <div class="sec">
-    <div class="sec-title" data-i18n="sec_anime_title">🎬 Үзэж болох аниме (Muse Asia)</div>
-    <div class="ep-grid" id="anime-ep-grid"></div>
-  </div>
-  <div class="sec">
     <div class="sec-title" data-i18n="sec_browse">📂 Бүх аниме</div>
     <div class="genre-bar" id="anime-genre-bar">
       <div class="gc on" onclick="filterAnimeBrowse(null,this)" data-i18n="genre_all">Бүгд</div>
@@ -2352,6 +2348,8 @@ var curAnime = null;
 var curEpIdx = 0;
 
 function renderAnimeEpGrid() {
+  var el = document.getElementById('anime-ep-grid');
+  if (!el) return;
   var html = '';
   ANIME_LIST.forEach(function(a) {
     var ep = a.episodes[0];
@@ -2363,7 +2361,7 @@ function renderAnimeEpGrid() {
         '<div class="ep-dur">⭐'+a.score+' • '+a.episodes.length+' '+t('ep_label')+'</div>'+
       '</div></div>';
   });
-  document.getElementById('anime-ep-grid').innerHTML = html;
+  el.innerHTML = html;
 }
 
 var MN_TO_EN_GENRE = {
