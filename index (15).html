@@ -1,0 +1,2812 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AniGem - Аниме & Манга үнэгүй үзэх</title>
+<meta name="description" content="AniGem - Монгол хэлээр аниме, манга үнэгүй онлайн үзэх сайт. Шинэ ангиуд, шилдэг аниме, манга цуглуулга.">
+<meta name="keywords" content="AniGem, anime, манга, аниме үзэх, манга унших, anime монгол">
+<meta property="og:title" content="AniGem - Аниме & Манга үнэгүй үзэх">
+<meta property="og:description" content="Монгол хэлээр аниме, манга үнэгүй онлайн үзэх сайт.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎬</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@600;700;800;900&display=swap" rel="stylesheet">
+<!-- Firebase Auth + Firestore -->
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0a0a12; --bg2:#13131f; --bg3:#20202f;
+  --glass:rgba(16,16,26,0.72); --glass2:rgba(28,28,44,0.6);
+  --accent:#a855f7; --accent2:#7c3aed; --pink:#ec4899;
+  --red:#f43f5e; --red2:#e11d48; --gold:#fbbf24;
+  --text:#f1f1f7; --text2:#8a8aa3; --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.13);
+  --grad:linear-gradient(135deg,#a855f7,#ec4899);
+  --grad-r:linear-gradient(135deg,#f43f5e,#fb7185);
+  --text-on-accent:#fff;
+  --shadow:0 18px 50px -12px rgba(0,0,0,0.7);
+  --glow:0 0 0 1px rgba(168,85,247,0.4), 0 14px 40px -8px rgba(168,85,247,0.45);
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Manrope',-apple-system,Arial,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.4;overflow-x:hidden;}
+/* ambient background glow */
+body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(60% 50% at 80% -5%,rgba(168,85,247,0.16),transparent 60%),
+    radial-gradient(50% 45% at 0% 10%,rgba(236,72,153,0.10),transparent 60%),
+    radial-gradient(70% 60% at 50% 110%,rgba(124,58,237,0.10),transparent 60%);}
+::selection{background:rgba(168,85,247,0.35);}
+*::-webkit-scrollbar{height:8px;width:8px;}
+*::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:20px;}
+img{user-select:none;}
+
+/* ===== NAV ===== */
+.nav{background:var(--glass);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);min-height:62px;padding:0 22px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100;border-bottom:1px solid var(--border);}
+.logo{font-family:'Unbounded',sans-serif;font-size:19px;font-weight:800;letter-spacing:-.5px;color:#fff;white-space:nowrap;display:flex;align-items:center;gap:9px;}
+.logo b{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.logo-icon{flex-shrink:0;border-radius:50%;}
+.nav-links{display:flex;gap:4px;}
+.nl{padding:8px 13px;border-radius:10px;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;border:none;background:none;transition:.2s;}
+.nl:hover{color:#fff;background:var(--glass2);}
+.nl.on{color:#fff;background:linear-gradient(135deg,rgba(168,85,247,0.22),rgba(236,72,153,0.18));box-shadow:inset 0 0 0 1px rgba(168,85,247,0.3);}
+.search-box{flex:1;max-width:360px;margin:0 6px;position:relative;}
+.search-box input{width:100%;background:var(--glass2);border:1px solid var(--border);border-radius:12px;padding:10px 36px 10px 38px;color:#fff;font-size:13px;font-family:inherit;outline:none;transition:.2s;}
+.search-box input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(168,85,247,0.18);background:rgba(28,28,44,0.9);}
+.search-box input::placeholder{color:var(--text2);}
+.search-box span{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--text2);}
+.adv-toggle{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:15px;color:var(--text2);padding:5px;border-radius:7px;transition:.2s;line-height:1;}
+.adv-toggle:hover,.adv-toggle.on{color:var(--accent);background:rgba(168,85,247,0.14);}
+.adv-panel{display:none;gap:10px;flex-wrap:wrap;padding:0 0 14px;}
+.adv-panel.on{display:flex;}
+.adv-panel select{background:var(--glass2);border:1px solid var(--border2);color:#fff;border-radius:9px;padding:8px 10px;font-size:12px;font-family:inherit;outline:none;cursor:pointer;}
+.adv-panel select:focus{border-color:var(--accent);}
+.nav-r{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.lang-btn{background:var(--glass2);color:#fff;border:1px solid var(--border2);padding:8px 13px;border-radius:11px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;transition:.2s;white-space:nowrap;}
+.lang-btn:hover{border-color:var(--accent);background:rgba(168,85,247,0.12);}
+.shop-btn{background:var(--glass2);color:#fff;border:1px solid var(--border2);padding:8px 13px;border-radius:11px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;transition:.2s;white-space:nowrap;display:flex;align-items:center;gap:6px;justify-content:center;}
+.shop-btn:hover{border-color:var(--gold);background:rgba(251,191,36,0.12);}
+.shop-emoji{font-size:14px;line-height:1;}
+.notif-btn{position:relative;background:var(--glass2);color:#fff;border:1px solid var(--border2);width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;transition:.2s;flex-shrink:0;font-family:inherit;}
+.notif-btn:hover{border-color:var(--accent);background:rgba(168,85,247,0.12);}
+.notif-badge{position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;font-size:9px;font-weight:800;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 3px;line-height:1;}
+.notif-item{padding:12px 14px;background:var(--glass2);border-radius:14px;margin-bottom:10px;border:1px solid var(--border);font-size:12px;line-height:1.5;}
+.notif-item.unread{border-color:var(--accent);background:rgba(168,85,247,0.08);}
+.notif-time{font-size:10px;color:var(--text2);margin-top:5px;}
+.leaderboard-item{display:flex;align-items:center;gap:12px;padding:11px 14px;background:var(--glass2);border-radius:14px;margin-bottom:8px;border:1px solid var(--border);}
+.leaderboard-rank{font-size:15px;font-weight:800;width:30px;text-align:center;flex-shrink:0;}
+.leaderboard-avatar{width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;}
+.leaderboard-avatar-ph{width:36px;height:36px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;flex-shrink:0;color:var(--text-on-accent);}
+.leaderboard-info{flex:1;min-width:0;}
+.leaderboard-name{font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.leaderboard-minutes{font-size:11px;color:var(--text2);}
+.shop-ov{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:600;display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:.25s;}
+.shop-ov.on{opacity:1;visibility:visible;}
+.shop-box{background:var(--bg2);border:1px solid var(--border2);border-radius:18px;padding:24px;max-width:420px;width:92%;max-height:85vh;overflow-y:auto;position:relative;}
+.shop-points{text-align:center;font-size:30px;font-weight:800;font-family:'Unbounded',sans-serif;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.shop-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px;background:var(--glass2);border-radius:14px;margin-bottom:10px;border:1px solid var(--border);}
+.shop-item.report-opt{cursor:pointer;transition:.2s;}
+.shop-item.report-opt:hover{border-color:var(--border2);}
+.shop-item.report-opt.sel{border-color:var(--accent);background:rgba(168,85,247,0.12);}
+.report-textarea{width:100%;background:var(--glass2);border:1px solid var(--border2);border-radius:12px;padding:10px 12px;color:var(--text);font-size:12px;font-family:inherit;resize:vertical;min-height:70px;margin-bottom:10px;}
+.report-mini-list{margin-top:6px;}
+.report-mini-item{background:var(--glass2);border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:11px;}
+.report-mini-item .rmi-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;font-weight:700;}
+.report-mini-item .rmi-meta{color:var(--text2);font-size:10px;margin-bottom:4px;}
+.report-status{font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap;}
+.report-status.open{background:rgba(251,191,36,0.14);color:var(--gold);border:1px solid rgba(251,191,36,0.3);}
+.report-status.resolved{background:rgba(34,197,94,0.14);color:#22c55e;border:1px solid rgba(34,197,94,0.3);}
+
+.comments-drawer{position:fixed;left:0;right:0;bottom:0;height:0;background:var(--bg2);border-top:1px solid var(--border2);z-index:550;display:flex;flex-direction:column;overflow:hidden;transition:height .3s ease;box-shadow:0 -10px 30px rgba(0,0,0,0.5);}
+.comments-drawer.on{height:50vh;}
+.comments-header{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--border);font-weight:700;font-size:13px;flex-shrink:0;}
+.comments-header button{background:none;border:none;color:var(--text2);font-size:18px;cursor:pointer;}
+.comments-list{flex:1;overflow-y:auto;padding:10px 18px;}
+.comment-item{padding:10px 0;border-bottom:1px solid var(--border);font-size:12px;}
+.comment-item .ci-top{display:flex;justify-content:space-between;align-items:center;gap:8px;}
+.comment-user{font-weight:700;display:flex;align-items:center;gap:6px;}
+.comment-text{color:var(--text);line-height:1.5;margin-top:3px;word-break:break-word;}
+.comment-time{font-size:10px;color:var(--text2);margin-top:4px;}
+.comment-del{background:none;border:none;color:var(--text2);font-size:11px;cursor:pointer;white-space:nowrap;}
+.comment-del:hover{color:var(--red);}
+.comments-input-row{display:flex;gap:8px;padding:12px 18px;border-top:1px solid var(--border);flex-shrink:0;}
+.comments-input-row input{flex:1;background:var(--glass2);border:1px solid var(--border2);border-radius:10px;padding:9px 12px;color:var(--text);font-size:12px;font-family:inherit;outline:none;}
+.comments-input-row button{background:var(--grad);color:var(--text-on-accent);border:none;padding:9px 16px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;}
+.player-icon-btn{background:rgba(255,255,255,0.08);border:1px solid var(--border2);color:#fff;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;transition:.2s;flex-shrink:0;}
+.player-icon-btn:hover{background:rgba(255,255,255,0.16);}
+.shop-item-info{flex:1;}
+.shop-item-name{font-weight:700;font-size:13px;margin-bottom:3px;}
+.shop-item-cost{font-size:11px;color:var(--text2);}
+.shop-buy-btn{background:var(--grad);color:var(--text-on-accent);border:none;padding:8px 14px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;transition:.2s;}
+.shop-buy-btn:disabled{opacity:.4;cursor:not-allowed;}
+.shop-buy-btn.owned{background:rgba(34,197,94,0.15);color:#22c55e;cursor:default;}
+.shop-close{position:absolute;top:14px;right:14px;background:none;border:none;color:var(--text2);font-size:18px;cursor:pointer;}
+.id-glitter{background:linear-gradient(90deg,#fff,#a855f7,#ec4899,#fbbf24,#fff);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;animation:glitterShift 2.5s linear infinite;font-weight:800;}
+@keyframes glitterShift{0%{background-position:0% 50%;}100%{background-position:300% 50%;}}
+.theme-row{display:flex;gap:10px;flex-wrap:wrap;}
+.theme-dot{width:38px;height:38px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:.2s;position:relative;flex-shrink:0;}
+.theme-dot:hover{transform:scale(1.1);}
+.theme-dot.on{border-color:#fff;box-shadow:0 0 0 2px var(--bg2),0 0 0 4px rgba(255,255,255,0.4);}
+.theme-dot.on::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:900;text-shadow:0 1px 3px rgba(0,0,0,0.5);}
+.nav-btn{background:var(--grad);color:var(--text-on-accent);border:none;padding:9px 18px;border-radius:11px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap;transition:.2s;box-shadow:0 6px 18px -4px rgba(168,85,247,0.5);}
+.nav-btn:hover{filter:brightness(1.1);transform:translateY(-1px);}
+.nav-avatar{width:38px;height:38px;border-radius:50%;border:2px solid transparent;background:var(--grad) border-box;cursor:pointer;object-fit:cover;box-shadow:0 0 0 2px var(--bg);}
+.nav-avatar-ph{width:38px;height:38px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;cursor:pointer;color:var(--text-on-accent);box-shadow:0 6px 16px -4px rgba(168,85,247,0.6);transition:.2s;}
+.nav-avatar-ph:hover{transform:scale(1.06);}
+
+/* ===== LOGIN ===== */
+.login-ov{position:fixed;inset:0;background:rgba(5,5,10,0.82);backdrop-filter:blur(8px);z-index:600;display:none;align-items:center;justify-content:center;padding:18px;}
+.login-ov.on{display:flex;animation:fade .3s;}
+.login-box{background:linear-gradient(180deg,var(--bg2),#0f0f1a);border-radius:24px;padding:42px 34px;max-width:400px;width:100%;text-align:center;border:1px solid var(--border2);box-shadow:var(--shadow);position:relative;overflow:hidden;animation:pop .35s cubic-bezier(.2,.9,.3,1.2);}
+.login-box::before{content:'';position:absolute;top:-50%;left:-10%;width:120%;height:120%;background:radial-gradient(circle at 50% 0%,rgba(168,85,247,0.18),transparent 55%);pointer-events:none;}
+.login-logo{font-family:'Unbounded',sans-serif;font-size:30px;font-weight:800;color:#fff;margin-bottom:4px;position:relative;display:flex;flex-direction:column;align-items:center;gap:10px;}
+.login-logo b{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.login-sub{font-size:13px;color:var(--text2);margin-bottom:26px;position:relative;}
+.login-title{font-family:'Unbounded',sans-serif;font-size:20px;font-weight:700;margin-bottom:8px;position:relative;}
+.login-desc{font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.6;position:relative;}
+.google-btn{width:100%;background:#fff;color:#1a1a1a;border:none;padding:14px 20px;border-radius:13px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:.2s;margin-bottom:14px;position:relative;}
+.google-btn:hover{transform:translateY(-2px);box-shadow:0 10px 26px -8px rgba(255,255,255,0.3);}
+.google-btn img{width:20px;height:20px;}
+.login-skip{font-size:13px;color:var(--text2);cursor:pointer;font-weight:600;position:relative;transition:.2s;}
+.login-skip:hover{color:#fff;}
+.login-features{display:flex;gap:10px;margin:22px 0;position:relative;}
+.lf{flex:1;background:var(--glass2);border:1px solid var(--border);border-radius:14px;padding:14px 8px;font-size:11px;font-weight:600;color:var(--text2);text-align:center;}
+.lf-icon{font-size:22px;margin-bottom:6px;}
+
+/* ===== AUTH TABS / FORMS ===== */
+.auth-tabs{display:flex;gap:0;margin-bottom:20px;background:var(--glass2);border:1px solid var(--border);border-radius:13px;padding:4px;position:relative;}
+.auth-tab{flex:1;padding:10px;border-radius:10px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;border:none;background:none;color:var(--text2);transition:.2s;}
+.auth-tab.active{background:var(--grad);color:var(--text-on-accent);box-shadow:0 6px 16px -5px rgba(168,85,247,0.5);}
+.auth-form{display:none;text-align:left;}
+.auth-form.active{display:block;animation:fade .25s;}
+.fg{margin-bottom:13px;}
+.fg label{display:block;font-size:11px;font-weight:700;color:var(--text2);margin-bottom:6px;letter-spacing:.3px;}
+.fg input{width:100%;background:var(--glass2);border:1px solid var(--border);border-radius:11px;padding:11px 13px;color:#fff;font-size:13px;font-family:inherit;outline:none;transition:.2s;}
+.fg input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(168,85,247,0.18);}
+.form-err{font-size:11px;font-weight:600;color:var(--red);margin-top:8px;min-height:14px;text-align:left;}
+.auth-submit{width:100%;background:var(--grad);color:var(--text-on-accent);border:none;padding:12px;border-radius:12px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:4px;transition:.2s;box-shadow:0 8px 22px -6px rgba(168,85,247,0.5);}
+.auth-submit:hover{filter:brightness(1.08);transform:translateY(-1px);}
+.auth-submit:disabled{opacity:.6;cursor:default;transform:none;}
+.forgot-link{font-size:11px;font-weight:600;color:#d8b4fe;cursor:pointer;text-align:right;margin-top:-7px;margin-bottom:13px;display:block;transition:.2s;}
+.forgot-link:hover{color:#fff;}
+.spin.sm{width:15px;height:15px;border-width:2px;display:inline-block;vertical-align:middle;margin-right:4px;}
+
+/* ===== VERIFY BANNER ===== */
+.verify-banner{background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.28);border-radius:13px;padding:13px 15px;margin:0 22px 14px;font-size:12px;font-weight:600;color:var(--gold);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.verify-banner button{background:rgba(251,191,36,0.18);border:1px solid rgba(251,191,36,0.35);color:var(--gold);padding:7px 13px;border-radius:9px;font-size:11px;font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap;transition:.2s;}
+.verify-banner button:hover{background:rgba(251,191,36,0.3);}
+.p-badge.verified{background:rgba(74,222,128,0.14);color:#86efac;border-color:rgba(74,222,128,0.3);}
+.p-badge.unverified{background:rgba(251,191,36,0.14);color:var(--gold);border-color:rgba(251,191,36,0.3);}
+
+/* ===== PROFILE LOGIN PROMPT ===== */
+.profile-login-prompt{text-align:center;padding:70px 20px;}
+.profile-login-prompt button{background:var(--grad);color:var(--text-on-accent);border:none;padding:12px 26px;border-radius:12px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:14px;box-shadow:0 8px 22px -6px rgba(168,85,247,0.5);}
+
+/* ===== ADMIN ===== */
+.admin-header{background:linear-gradient(135deg,#1c1033,#0d1430);padding:22px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.admin-header .at{font-family:'Unbounded',sans-serif;font-size:20px;font-weight:800;}
+.admin-back{background:var(--glass2);color:#fff;border:1px solid var(--border);padding:8px 16px;border-radius:10px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;}
+.admin-summary{display:flex;gap:12px;padding:16px 22px;flex-wrap:wrap;}
+.admin-pill{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:14px 20px;flex:1;min-width:120px;text-align:center;}
+.admin-pill-n{font-family:'Unbounded',sans-serif;font-size:24px;font-weight:800;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.admin-pill-l{font-size:11px;color:var(--text2);font-weight:600;margin-top:4px;}
+.admin-users{padding:0 22px 22px;display:flex;flex-direction:column;gap:12px;}
+.admin-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:16px 18px;}
+.admin-card-top{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.admin-avatar{width:40px;height:40px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:var(--text-on-accent);flex-shrink:0;}
+.admin-card-name{font-size:14px;font-weight:700;}
+.admin-card-email{font-size:11px;color:var(--text2);}
+.admin-card-meta{font-size:10px;color:var(--text2);margin-top:2px;}
+.admin-badge-self{font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;background:rgba(251,191,36,0.14);color:var(--gold);border:1px solid rgba(251,191,36,0.3);margin-left:auto;}
+.admin-badge-banned{font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;background:rgba(244,63,94,0.14);color:var(--red);border:1px solid rgba(244,63,94,0.3);margin-left:auto;}
+.admin-actions{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 12px;}
+.admin-action-btn{background:rgba(168,85,247,0.12);color:#c4b5fd;border:1px solid rgba(168,85,247,0.28);padding:7px 12px;border-radius:10px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;transition:.2s;}
+.admin-action-btn:hover{background:rgba(168,85,247,0.2);}
+.admin-action-btn.danger{background:rgba(244,63,94,0.12);color:#fb7185;border-color:rgba(244,63,94,0.28);}
+.admin-action-btn.danger:hover{background:rgba(244,63,94,0.2);}
+.admin-section-label{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin:10px 0 6px;}
+.admin-tag-row{display:flex;gap:6px;flex-wrap:wrap;}
+.admin-tag{font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;background:rgba(168,85,247,0.14);color:#d8b4fe;border:1px solid rgba(168,85,247,0.3);}
+.admin-watch-item{display:flex;justify-content:space-between;align-items:center;padding:8px 11px;border-radius:10px;background:var(--bg3);margin-bottom:5px;font-size:12px;}
+.admin-watch-item span{color:var(--text2);font-size:11px;font-weight:600;}
+.admin-empty-small{font-size:11px;color:var(--text2);}
+
+/* ===== PROFILE ===== */
+.profile-header{background:linear-gradient(135deg,#1c1033,#0d1430);padding:34px 24px;display:flex;align-items:center;gap:22px;position:relative;overflow:hidden;}
+.profile-header::after{content:'';position:absolute;inset:0;background:radial-gradient(60% 100% at 0% 0%,rgba(168,85,247,0.2),transparent 60%);}
+.fire-bg{animation:fireBorder 2.2s ease-in-out infinite;}
+@keyframes fireBorder{
+  0%,100%{box-shadow:0 0 24px 5px rgba(255,90,0,0.5),0 0 50px 14px rgba(255,40,0,0.22);}
+  50%{box-shadow:0 0 42px 10px rgba(255,170,0,0.85),0 0 75px 20px rgba(255,70,0,0.4);}
+}
+.profile-avatar{width:84px;height:84px;border-radius:50%;border:3px solid transparent;background:var(--grad) border-box;object-fit:cover;position:relative;z-index:1;}
+.profile-avatar-ph{width:84px;height:84px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;color:var(--text-on-accent);position:relative;z-index:1;box-shadow:0 8px 24px -6px rgba(168,85,247,0.6);}
+.avatar-wrap{position:relative;flex-shrink:0;}
+.avatar-edit{position:absolute;bottom:-2px;right:-2px;width:28px;height:28px;border-radius:50%;background:var(--bg2);border:2px solid var(--bg);display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;z-index:2;transition:.2s;}
+.avatar-edit:hover{background:var(--accent);}
+.avatar-input{display:none;}
+.avatar-zoom-ov{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:700;display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .25s;}
+.avatar-zoom-ov.on{opacity:1;visibility:visible;}
+.avatar-zoom-ov img{width:260px;height:260px;border-radius:50%;object-fit:cover;border:4px solid var(--accent);box-shadow:0 20px 60px rgba(0,0,0,0.6);transform:scale(.7);transition:transform .25s;cursor:pointer;}
+.avatar-zoom-ov.on img{transform:scale(1);}
+.profile-info{position:relative;z-index:1;}
+.profile-info .p-name{font-family:'Unbounded',sans-serif;font-size:21px;font-weight:700;margin-bottom:3px;}
+.fire-name{
+  background:linear-gradient(90deg,#ff3d00,#ffd200,#ff6a00,#ff0040,#ffd200,#ff3d00);
+  background-size:300% 100%;
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
+  animation:fireText 3s linear infinite, fireGlow 1.4s ease-in-out infinite;
+  font-weight:800;letter-spacing:.5px;
+}
+@keyframes fireText{0%{background-position:0% 50%;}100%{background-position:300% 50%;}}
+@keyframes fireGlow{0%,100%{filter:drop-shadow(0 0 6px rgba(255,100,0,0.7)) drop-shadow(0 0 14px rgba(255,40,0,0.4));}50%{filter:drop-shadow(0 0 14px rgba(255,170,0,0.95)) drop-shadow(0 0 26px rgba(255,60,0,0.6));}}
+.profile-info .p-email{font-size:12px;color:var(--text2);margin-bottom:9px;}
+.profile-info .p-joined{font-size:11px;color:var(--text2);}
+.p-badges{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
+.p-badge{font-size:10px;font-weight:600;padding:4px 10px;border-radius:20px;background:rgba(168,85,247,0.16);color:#d8b4fe;border:1px solid rgba(168,85,247,0.3);}
+.profile-stats{display:flex;border-bottom:1px solid var(--border);background:var(--bg2);}
+.pstat{flex:1;padding:18px;text-align:center;border-right:1px solid var(--border);}
+.pstat:last-child{border-right:none;}
+.pstat-n{font-family:'Unbounded',sans-serif;font-size:24px;font-weight:700;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.pstat-l{font-size:11px;color:var(--text2);margin-top:4px;font-weight:600;}
+.profile-section{padding:18px 22px;}
+.profile-section-title{font-size:11px;font-weight:700;margin-bottom:13px;color:var(--text2);text-transform:uppercase;letter-spacing:1.4px;}
+.logout-btn{width:100%;background:rgba(244,63,94,0.12);color:var(--red);border:1px solid rgba(244,63,94,0.28);padding:12px;border-radius:12px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;margin-top:8px;transition:.2s;}
+.logout-btn:hover{background:rgba(244,63,94,0.2);}
+.edit-btn{width:100%;background:rgba(168,85,247,0.12);color:#c4b5fd;border:1px solid rgba(168,85,247,0.28);padding:12px;border-radius:12px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;margin-bottom:8px;transition:.2s;}
+.edit-btn:hover{background:rgba(168,85,247,0.2);}
+
+/* ===== HERO ===== */
+.hero{height:420px;position:relative;overflow:hidden;}
+.hero-bg{position:absolute;inset:0;background:linear-gradient(135deg,#1a0f33,#0c1330);}
+.hero-bg::after{content:'';position:absolute;inset:0;background:
+  radial-gradient(40% 60% at 75% 30%,rgba(168,85,247,0.4),transparent 60%),
+  radial-gradient(35% 50% at 90% 80%,rgba(236,72,153,0.3),transparent 60%);
+  animation:drift 14s ease-in-out infinite alternate;}
+.hero-ov{position:absolute;inset:0;background:linear-gradient(to right,var(--bg) 0%,rgba(10,10,18,0.7) 50%,rgba(10,10,18,0.2) 100%);}
+.hero-ov2{position:absolute;bottom:0;left:0;right:0;height:120px;background:linear-gradient(to top,var(--bg),transparent);}
+.hero-inner{position:relative;z-index:2;height:100%;display:flex;align-items:center;padding:0 40px;gap:32px;}
+.hero-poster{width:170px;height:248px;border-radius:16px;overflow:hidden;flex-shrink:0;box-shadow:0 20px 50px -10px rgba(0,0,0,0.8),0 0 0 1px rgba(168,85,247,0.3);transition:.4s;}
+.hero-poster:hover{transform:translateY(-6px) scale(1.02);}
+.hero-poster img{width:100%;height:100%;object-fit:cover;}
+.hero-info{max-width:520px;}
+.hbadges{display:flex;gap:7px;margin-bottom:12px;flex-wrap:wrap;}
+.hb{font-size:10px;font-weight:700;padding:5px 11px;border-radius:20px;letter-spacing:.4px;}
+.hb1{background:rgba(168,85,247,0.2);color:#d8b4fe;border:1px solid rgba(168,85,247,0.35);}
+.hb2{background:rgba(251,191,36,0.14);color:var(--gold);border:1px solid rgba(251,191,36,0.32);}
+.hb3{background:rgba(96,165,250,0.14);color:#93c5fd;border:1px solid rgba(96,165,250,0.3);}
+.htitle{font-family:'Unbounded',sans-serif;font-size:32px;font-weight:800;line-height:1.1;margin-bottom:6px;letter-spacing:-.5px;}
+.hen{font-size:13px;color:var(--text2);margin-bottom:12px;}
+.hdesc{font-size:13px;color:#c4c4d4;line-height:1.7;margin-bottom:16px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.hmeta{display:flex;gap:16px;margin-bottom:18px;}
+.hm{font-size:12px;color:var(--text2);font-weight:600;}
+.hbtns{display:flex;gap:10px;flex-wrap:wrap;}
+.btn-a{color:var(--text-on-accent);border:none;padding:11px 22px;border-radius:12px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;transition:.2s;}
+.btn-a.pu{background:var(--grad);box-shadow:0 8px 22px -6px rgba(168,85,247,0.55);}
+.btn-a.ru{background:var(--grad-r);box-shadow:0 8px 22px -6px rgba(244,63,94,0.55);}
+.btn-a:hover{filter:brightness(1.08);transform:translateY(-2px);}
+.btn-sec{background:var(--glass2);color:#fff;border:1px solid var(--border2);padding:11px 20px;border-radius:12px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;transition:.2s;}
+.btn-sec:hover{background:rgba(255,255,255,0.12);border-color:var(--accent);}
+
+/* ===== GENRE ===== */
+.genre-bar{padding:14px 22px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border);}
+.genre-bar::-webkit-scrollbar{display:none;}
+.gc{padding:7px 15px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--bg2);color:var(--text2);white-space:nowrap;transition:.2s;}
+.gc:hover{color:#fff;border-color:var(--border2);}
+.gc.on{background:var(--grad);color:var(--text-on-accent);border-color:transparent;box-shadow:0 6px 16px -5px rgba(168,85,247,0.55);}
+
+/* ===== SECTION ===== */
+.sec{padding:20px 22px;}
+.sec-title{font-family:'Unbounded',sans-serif;font-size:16px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:9px;letter-spacing:-.3px;}
+.sec-title::before{content:'';width:4px;height:18px;background:var(--grad);border-radius:3px;display:inline-block;}
+.sec-title.r::before{background:var(--grad-r);}
+.row{display:flex;gap:14px;overflow-x:auto;padding:4px 0 10px;scrollbar-width:none;}
+.row-wrap{position:relative;}
+.row-arrow{position:absolute;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:50%;background:rgba(15,15,25,0.9);border:1px solid var(--border2);color:#fff;font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5;transition:.2s;line-height:1;font-family:inherit;}
+.row-arrow:hover{background:var(--accent);transform:translateY(-50%) scale(1.1);}
+.row-arrow.left{left:-6px;}
+.row-arrow.right{right:-6px;}
+@media (max-width:700px){.row-arrow{display:none;}}
+.row::-webkit-scrollbar{display:none;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;}
+
+/* ===== CARD ===== */
+.card{cursor:pointer;border-radius:14px;overflow:hidden;background:var(--bg2);border:1px solid var(--border);transition:transform .25s cubic-bezier(.2,.8,.3,1),box-shadow .25s,border-color .25s;flex-shrink:0;position:relative;min-width:150px;width:150px;}
+.card:hover{transform:translateY(-6px);border-color:rgba(168,85,247,0.5);box-shadow:var(--glow);}
+.card.mc:hover{border-color:rgba(244,63,94,0.5);box-shadow:0 0 0 1px rgba(244,63,94,0.4),0 14px 40px -8px rgba(244,63,94,0.4);}
+.card img{width:100%;aspect-ratio:2/3;object-fit:cover;display:block;transition:.35s;}
+.card:hover img{transform:scale(1.05);}
+.card-ph{width:100%;aspect-ratio:2/3;display:flex;align-items:center;justify-content:center;font-size:34px;background:linear-gradient(135deg,var(--bg3),#1a0f2e);}
+.card-body{padding:9px 10px;}
+.card-title{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:5px;}
+.card-meta{display:flex;justify-content:space-between;align-items:center;}
+.cs{font-size:11px;font-weight:700;color:var(--gold);}
+.ct{font-size:9px;font-weight:600;color:var(--text2);background:var(--bg3);padding:2px 6px;border-radius:5px;}
+.cbadge{position:absolute;top:7px;left:7px;color:#fff;font-size:11px;padding:4px 6px;border-radius:8px;font-weight:600;background:rgba(10,10,18,0.7);backdrop-filter:blur(6px);box-shadow:0 0 0 1px rgba(255,255,255,0.1);}
+
+/* ===== EP GRID ===== */
+.ep-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;}
+.ep-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;display:flex;gap:12px;padding:10px;transition:.2s;}
+.ep-card:hover{border-color:rgba(168,85,247,0.45);background:var(--bg3);transform:translateY(-2px);}
+.ep-thumb{width:112px;height:68px;border-radius:10px;overflow:hidden;flex-shrink:0;background:var(--bg3);position:relative;}
+.ep-thumb img{width:100%;height:100%;object-fit:cover;}
+.ep-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.35);font-size:22px;color:#fff;opacity:.85;transition:.2s;}
+.ep-card:hover .ep-play{opacity:1;background:rgba(168,85,247,0.35);}
+.ep-info{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;}
+.ep-num{font-size:10px;color:#c4b5fd;font-weight:700;margin-bottom:4px;letter-spacing:.3px;}
+.ep-title2{font-size:13px;font-weight:600;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ep-dur{font-size:11px;color:var(--text2);font-weight:600;}
+
+/* ===== PLAYER ===== */
+.player-overlay{position:fixed;inset:0;background:#000;z-index:500;display:none;flex-direction:column;}
+.player-overlay.on{display:flex;}
+.player-nav{background:var(--glass);backdrop-filter:blur(16px);padding:11px 18px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.player-title{font-size:14px;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.p-close{background:var(--bg3);border:1px solid var(--border);color:#fff;padding:8px 14px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;transition:.2s;}
+.p-close:hover{background:var(--accent);border-color:var(--accent);}
+.yt-frame{flex:1;width:100%;border:none;}
+.ep-bar{background:var(--bg2);border-top:1px solid var(--border);height:96px;overflow-x:auto;display:flex;gap:10px;padding:10px 14px;scrollbar-width:none;flex-shrink:0;}
+.ep-bar::-webkit-scrollbar{display:none;}
+.ep-mini{cursor:pointer;border-radius:9px;overflow:hidden;flex-shrink:0;width:128px;border:2px solid transparent;transition:.2s;}
+.ep-mini:hover{border-color:var(--border2);}
+.ep-mini.on{border-color:var(--accent);}
+.ep-mini-thumb{width:100%;height:56px;background:var(--bg3);position:relative;overflow:hidden;}
+.ep-mini-thumb img{width:100%;height:100%;object-fit:cover;}
+.ep-mini-lbl{font-size:10px;font-weight:600;padding:4px 6px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* ===== READER ===== */
+.reader-ov{position:fixed;inset:0;background:#000;z-index:500;display:none;flex-direction:column;}
+.reader-ov.on{display:flex;}
+.reader-nav{background:var(--glass);backdrop-filter:blur(16px);padding:11px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap;}
+.reader-title{font-size:14px;font-weight:600;flex:1;}
+.r-btn{background:var(--bg3);border:1px solid var(--border);color:#fff;padding:8px 13px;border-radius:10px;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;transition:.2s;}
+.r-btn:hover{background:var(--accent);border-color:var(--accent);}
+.r-sel{background:var(--bg3);border:1px solid var(--border);color:#fff;padding:7px 11px;border-radius:10px;font-size:12px;font-family:inherit;outline:none;max-width:170px;}
+.reader-body{flex:1;overflow-y:auto;display:flex;flex-direction:column;align-items:center;background:#0d0d14;}
+.r-page{max-width:820px;width:100%;display:block;}
+.r-info{color:var(--text2);font-size:13px;text-align:center;padding:48px 20px;}
+
+/* ===== MODAL ===== */
+.modal-ov{position:fixed;inset:0;background:rgba(5,5,10,0.8);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:200;padding:18px;}
+.modal-ov.on{display:flex;animation:fade .25s;}
+.modal{background:linear-gradient(180deg,var(--bg2),#0e0e18);border-radius:20px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;border:1px solid var(--border2);box-shadow:var(--shadow);animation:pop .3s cubic-bezier(.2,.9,.3,1.1);}
+.modal-banner{height:180px;position:relative;}
+.mbbg{position:absolute;inset:0;background:linear-gradient(135deg,#1c1033,#2d1b4e);}
+.mbov{position:absolute;inset:0;background:linear-gradient(to top,var(--bg2),transparent 65%);}
+.modal-x{position:absolute;top:12px;right:12px;z-index:5;background:rgba(5,5,10,0.6);backdrop-filter:blur(8px);border:1px solid var(--border2);color:#fff;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:15px;transition:.2s;}
+.modal-x:hover{background:var(--red);border-color:var(--red);}
+.modal-body{padding:20px;}
+.mt{font-family:'Unbounded',sans-serif;font-size:20px;font-weight:700;margin-bottom:3px;line-height:1.2;}
+.me2{font-size:12px;color:var(--text2);margin-bottom:14px;}
+.mstats{display:flex;gap:18px;margin-bottom:14px;flex-wrap:wrap;}
+.ms{font-size:12px;color:var(--text2);font-weight:600;}
+.ms span{color:#fff;font-weight:700;}
+.mgenres{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.mg{font-size:11px;font-weight:600;padding:4px 11px;border-radius:20px;background:rgba(168,85,247,0.14);color:#d8b4fe;border:1px solid rgba(168,85,247,0.3);}
+.mg.r{background:rgba(244,63,94,0.14);color:#fda4af;border-color:rgba(244,63,94,0.3);}
+.mdesc{font-size:13px;color:#c0c0d0;line-height:1.7;margin-bottom:16px;}
+.mactions{display:flex;gap:10px;margin-bottom:14px;}
+.trailer-w{border-radius:12px;overflow:hidden;aspect-ratio:16/9;background:#000;border:1px solid var(--border);}
+.trailer-w iframe{width:100%;height:100%;border:none;}
+.ch-list{margin-top:14px;}
+.ch-title2{font-size:13px;font-weight:700;margin-bottom:8px;color:#fda4af;}
+.ch-item{display:flex;justify-content:space-between;align-items:center;padding:11px 13px;border-radius:11px;background:var(--bg3);margin-bottom:5px;cursor:pointer;transition:.18s;}
+.ch-item:hover{background:rgba(244,63,94,0.16);transform:translateX(3px);}
+.ch-n{font-size:12px;font-weight:600;}
+.ch-r{font-size:11px;color:#fda4af;font-weight:600;}
+
+/* ===== ONE PIECE ===== */
+.op-feat{margin:18px 22px 0;border-radius:18px;overflow:hidden;position:relative;height:200px;cursor:pointer;border:1px solid rgba(244,63,94,0.3);transition:.25s;}
+.op-feat:hover{border-color:rgba(244,63,94,0.6);box-shadow:0 16px 44px -10px rgba(244,63,94,0.4);}
+.op-bg{position:absolute;inset:0;background:linear-gradient(135deg,#2a0a04,#480f02);}
+.op-ov2{position:absolute;inset:0;background:linear-gradient(to right,rgba(8,4,2,0.92) 0%,rgba(8,4,2,0.3) 70%,transparent);}
+.op-inner{position:relative;z-index:2;height:100%;display:flex;align-items:center;padding:18px 26px;gap:20px;}
+.op-cover{width:100px;height:144px;border-radius:10px;overflow:hidden;flex-shrink:0;box-shadow:0 12px 30px -8px rgba(0,0,0,0.7);border:1px solid rgba(244,63,94,0.4);}
+.op-cover img{width:100%;height:100%;object-fit:cover;}
+.op-label{font-size:10px;color:#fb7185;font-weight:800;letter-spacing:2.5px;margin-bottom:6px;}
+.op-title{font-family:'Unbounded',sans-serif;font-size:26px;font-weight:900;margin-bottom:3px;letter-spacing:-.5px;}
+.op-sub{font-size:12px;color:#bbb;margin-bottom:12px;}
+.op-stats{display:flex;gap:14px;margin-bottom:14px;}
+.op-st{font-size:11px;color:var(--text2);font-weight:600;}
+.op-st span{color:#fff;font-weight:700;}
+.op-btn{background:var(--grad-r);color:var(--text-on-accent);border:none;padding:10px 22px;border-radius:11px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;box-shadow:0 8px 20px -6px rgba(244,63,94,0.55);transition:.2s;}
+.op-btn:hover{filter:brightness(1.1);transform:translateY(-1px);}
+
+/* ===== PAGE ===== */
+.page{display:none;}
+.page.on{display:block;animation:fade .3s;}
+#fans-page.on{animation:pop .35s cubic-bezier(.2,.8,.3,1);transform-origin:center center;}
+
+/* ===== SKELETON / SPIN / TOAST ===== */
+.sk{min-width:150px;width:150px;border-radius:14px;overflow:hidden;background:var(--bg2);border:1px solid var(--border);flex-shrink:0;}
+.s{background:linear-gradient(90deg,var(--bg3) 25%,var(--bg2) 50%,var(--bg3) 75%);background-size:200% 100%;animation:sh 1.5s infinite;}
+@keyframes sh{to{background-position:-200% 0;}}
+.si{width:100%;aspect-ratio:2/3;}
+.sl{height:11px;margin:8px 10px 4px;border-radius:4px;}
+.ss{height:9px;margin:4px 10px 9px;border-radius:4px;width:50%;}
+.spin-wrap{display:flex;align-items:center;justify-content:center;padding:36px;width:100%;}
+.spin{width:30px;height:30px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:sp .8s linear infinite;}
+@keyframes sp{to{transform:rotate(360deg);}}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--bg3);color:#fff;padding:12px 20px;border-radius:13px;font-size:13px;font-weight:600;border:1px solid var(--border2);box-shadow:var(--shadow);transition:transform .35s cubic-bezier(.2,.9,.3,1.3);z-index:999;white-space:nowrap;}
+.toast.on{transform:translateX(-50%) translateY(0);}
+.footer{padding:24px 16px;text-align:center;color:var(--text2);font-size:11px;border-top:1px solid var(--border);margin-top:20px;}
+
+@keyframes fade{from{opacity:0;}to{opacity:1;}}
+@keyframes pop{from{opacity:0;transform:scale(.94) translateY(10px);}to{opacity:1;transform:scale(1) translateY(0);}}
+@keyframes drift{from{transform:translate(0,0);}to{transform:translate(-4%,3%);}}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:720px){
+  .nav{flex-wrap:wrap;padding:10px 16px;min-height:auto;gap:10px;}
+  .nav-links{order:3;width:100%;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
+  .nav-links::-webkit-scrollbar{display:none;}
+  .search-box{order:2;max-width:none;margin:0;min-width:120px;}
+  .nav-r{order:1;}
+  .hero{height:auto;min-height:380px;}
+  .hero-inner{flex-direction:column;align-items:flex-start;justify-content:flex-end;padding:24px 22px 28px;gap:18px;text-align:left;}
+  .hero-poster{width:120px;height:176px;}
+  .hero-info{max-width:none;}
+  .htitle{font-size:24px;}
+  .op-inner{padding:16px 20px;gap:14px;}
+  .op-title{font-size:20px;}
+  .op-cover{width:80px;height:116px;}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(95px,1fr));gap:9px;}
+  .card,.sk{min-width:105px;width:105px;}
+  .card-body{padding:7px 8px;}
+  .card-title{font-size:11px;}
+  .ep-grid{grid-template-columns:1fr;}
+  .logo{font-size:16px;gap:6px;}
+  .nav-r{gap:6px;}
+  .notif-btn{width:34px;height:34px;font-size:13px;}
+  .shop-btn{width:34px;height:34px;padding:0;border-radius:11px;}
+  .shop-label{display:none;}
+  .lang-btn{padding:7px 9px;font-size:11px;}
+  .nav-avatar,.nav-avatar-ph{width:34px;height:34px;}
+  .player-nav{gap:8px;padding:10px 12px;}
+  .player-icon-btn{width:32px;height:32px;font-size:13px;}
+  .p-close{padding:8px 11px;font-size:12px;}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="nav">
+  <div class="logo" onclick="goHome()" style="cursor:pointer;">
+    <svg class="logo-icon" width="32" height="32" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="50" cy="50" r="48" fill="#0a0a0a" stroke="#2a2a2a" stroke-width="1"/>
+      <text x="50" y="71" font-family="Georgia,'Times New Roman',serif" font-size="60" font-weight="900" fill="#f5f5f5" text-anchor="middle">A</text>
+      <line x1="33" y1="62" x2="69" y2="44" stroke="#0a0a0a" stroke-width="4"/>
+      <path d="M74 18 L77 27 L86 30 L77 33 L74 42 L71 33 L62 30 L71 27 Z" fill="#f5f5f5"/>
+    </svg>
+    Ani<b>Gem</b>
+  </div>
+  <div class="nav-links">
+    <button class="nl on" onclick="goPage('home')" data-i18n="nav_home">🏠 Нүүр</button>
+    <button class="nl" onclick="goPage('anime')" data-i18n="nav_anime">🎬 Аниме</button>
+    <button class="nl" onclick="goPage('manga')" data-i18n="nav_manga">📚 Манга</button>
+    <button class="nl" onclick="goPage('wl')" data-i18n="nav_wl">❤️ Жагсаалт</button>
+  </div>
+  <div class="search-box">
+    <span>🔍</span>
+    <input type="text" placeholder="Хайх..." id="si" oninput="doSearch(this.value)" data-i18n-ph="search_ph">
+    <button class="adv-toggle" onclick="toggleAdvSearch()" id="adv-toggle-btn" title="Advanced search">⚙️</button>
+  </div>
+  <div class="nav-r" id="nav-r">
+    <button class="notif-btn" onclick="openTopFans()">🏆</button>
+    <button class="notif-btn" onclick="openNotifications()">🔔<span class="notif-badge" style="display:none;">0</span></button>
+    <button class="shop-btn" onclick="openShop()"><span class="shop-emoji">🛍️</span><span class="shop-label" data-i18n="shop_label">Дэлгүүр</span></button>
+    <button class="lang-btn" onclick="toggleLang()" id="lang-btn">MN</button>
+    <button class="nav-btn" onclick="showLogin()" data-i18n="login_btn">Нэвтрэх</button>
+  </div>
+</nav>
+
+<!-- LOGIN OVERLAY -->
+<div class="login-ov" id="login-ov">
+  <div class="login-box">
+    <div class="login-logo">
+      <svg width="52" height="52" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="48" fill="#0a0a0a" stroke="#2a2a2a" stroke-width="1"/>
+        <text x="50" y="71" font-family="Georgia,'Times New Roman',serif" font-size="60" font-weight="900" fill="#f5f5f5" text-anchor="middle">A</text>
+        <line x1="33" y1="62" x2="69" y2="44" stroke="#0a0a0a" stroke-width="4"/>
+        <path d="M74 18 L77 27 L86 30 L77 33 L74 42 L71 33 L62 30 L71 27 Z" fill="#f5f5f5"/>
+      </svg>
+      <div>Ani<b>Gem</b></div>
+    </div>
+    <div class="login-sub" data-i18n="login_sub">Имэйлээрээ бүртгүүлж эхэл</div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')" data-i18n="tab_login">Нэвтрэх</button>
+      <button class="auth-tab" id="tab-signup" onclick="switchAuthTab('signup')" data-i18n="tab_signup">Бүртгүүлэх</button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div class="auth-form active" id="form-login">
+      <div class="fg">
+        <label data-i18n="label_email">Имэйл</label>
+        <input type="email" id="login-email" placeholder="name@gmail.com">
+      </div>
+      <div class="fg">
+        <label data-i18n="label_pass">Нууц үг</label>
+        <input type="password" id="login-pass" placeholder="••••••••">
+      </div>
+      <span class="forgot-link" onclick="doForgotPassword()" data-i18n="forgot">Нууц үгээ мартсан?</span>
+      <div class="form-err" id="login-err"></div>
+      <button class="auth-submit" id="login-btn" onclick="doLogin()" data-i18n="login_submit">Нэвтрэх</button>
+    </div>
+
+    <!-- SIGNUP FORM -->
+    <div class="auth-form" id="form-signup">
+      <div class="fg">
+        <label data-i18n="label_name">Нэр</label>
+        <input type="text" id="su-name" placeholder="Таны нэр" data-i18n-ph="ph_name">
+      </div>
+      <div class="fg">
+        <label data-i18n="label_email_gmail">Имэйл (Gmail)</label>
+        <input type="email" id="su-email" placeholder="name@gmail.com">
+      </div>
+      <div class="fg">
+        <label data-i18n="label_pass6">Нууц үг (6+ тэмдэгт)</label>
+        <input type="password" id="su-pass" placeholder="••••••••">
+      </div>
+      <div class="fg">
+        <label data-i18n="label_pass2">Нууц үг давтах</label>
+        <input type="password" id="su-pass2" placeholder="••••••••">
+      </div>
+      <div class="form-err" id="signup-err"></div>
+      <button class="auth-submit" id="signup-btn" onclick="doSignup()" data-i18n="signup_submit">Бүртгүүлэх</button>
+    </div>
+
+    <div class="login-features">
+      <div class="lf"><div class="lf-icon">❤️</div><span data-i18n="lf1">Watchlist хадгалах</span></div>
+      <div class="lf"><div class="lf-icon">📖</div><span data-i18n="lf2">Уншсан манга</span></div>
+      <div class="lf"><div class="lf-icon">🎬</div><span data-i18n="lf3">Үзсэн аниме</span></div>
+    </div>
+    <div class="login-skip" onclick="hideLogin()" data-i18n="skip">Одоохондоо алгасах →</div>
+  </div>
+</div>
+
+<!-- HOME -->
+<div id="home-page">
+  <div class="sec" id="search-sec" style="display:none;">
+    <div class="sec-title" style="display:flex;align-items:center;justify-content:space-between;">
+      <span data-i18n="sec_search">🔍 Хайлт</span>
+      <button class="adv-toggle" onclick="goHome()" title="Close" style="position:static;">✕</button>
+    </div>
+    <div class="adv-panel" id="adv-panel">
+      <select id="adv-genre" onchange="doSearch(document.getElementById('si').value)">
+        <option value="" data-i18n="adv_all_genre">Бүх төрөл</option>
+        <option value="Action" data-mn="Экшн" data-en="Action">Экшн</option>
+        <option value="Adventure" data-mn="Адал явдал" data-en="Adventure">Адал явдал</option>
+        <option value="Comedy" data-mn="Инээдмийн" data-en="Comedy">Инээдмийн</option>
+        <option value="Drama" data-mn="Драм" data-en="Drama">Драм</option>
+        <option value="Fantasy" data-mn="Фэнтэзи" data-en="Fantasy">Фэнтэзи</option>
+        <option value="Horror" data-mn="Аймшиг" data-en="Horror">Аймшиг</option>
+        <option value="Mystery" data-mn="Нууц" data-en="Mystery">Нууц</option>
+        <option value="Romance" data-mn="Романс" data-en="Romance">Романс</option>
+        <option value="Sci-Fi" data-mn="Шинжлэх ухаан" data-en="Sci-Fi">Шинжлэх ухаан</option>
+        <option value="Slice of Life" data-mn="Амьдрал" data-en="Slice of Life">Амьдрал</option>
+        <option value="Sports" data-mn="Спорт" data-en="Sports">Спорт</option>
+        <option value="Supernatural" data-mn="Ид шид" data-en="Supernatural">Ид шид</option>
+        <option value="Thriller" data-mn="Триллер" data-en="Thriller">Триллер</option>
+      </select>
+      <select id="adv-format" onchange="doSearch(document.getElementById('si').value)">
+        <option value="" data-i18n="adv_all_format">Бүх формат</option>
+        <option value="TV" data-mn="Цуврал (TV)" data-en="TV Series">Цуврал (TV)</option>
+        <option value="MOVIE" data-mn="Кино" data-en="Movie">Кино</option>
+        <option value="OVA" data-mn="OVA" data-en="OVA">OVA</option>
+        <option value="ONA" data-mn="ONA" data-en="ONA">ONA</option>
+        <option value="SPECIAL" data-mn="Special" data-en="Special">Special</option>
+        <option value="MUSIC" data-mn="Хөгжим" data-en="Music">Хөгжим</option>
+      </select>
+      <select id="adv-year" onchange="doSearch(document.getElementById('si').value)">
+        <option value="" data-i18n="adv_all_year">Бүх он</option>
+        <option value="2026">2026</option><option value="2025">2025</option><option value="2024">2024</option><option value="2023">2023</option><option value="2022">2022</option><option value="2021">2021</option><option value="2020">2020</option><option value="2019">2019</option><option value="2018">2018</option><option value="2017">2017</option><option value="2016">2016</option><option value="2015">2015</option><option value="2014">2014</option><option value="2013">2013</option><option value="2012">2012</option><option value="2011">2011</option><option value="2010">2010</option><option value="2009">2009</option><option value="2008">2008</option><option value="2007">2007</option><option value="2006">2006</option><option value="2005">2005</option><option value="2004">2004</option><option value="2003">2003</option><option value="2002">2002</option><option value="2001">2001</option><option value="2000">2000</option>
+      </select>
+      <select id="adv-sort" onchange="doSearch(document.getElementById('si').value)">
+        <option value="POPULARITY_DESC" data-mn="Алдартай" data-en="Popularity">Алдартай</option>
+        <option value="SCORE_DESC" data-mn="Үнэлгээ" data-en="Score">Үнэлгээ</option>
+        <option value="TRENDING_DESC" data-mn="Trending" data-en="Trending">Trending</option>
+        <option value="START_DATE_DESC" data-mn="Шинэ" data-en="Newest">Шинэ</option>
+      </select>
+    </div>
+    <div class="grid" id="search-grid"></div>
+  </div>
+  <div id="home-main">
+  <div class="hero" id="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-ov"></div>
+    <div class="hero-ov2"></div>
+    <div class="hero-inner" id="hero-c"><div class="spin-wrap"><div class="spin"></div></div></div>
+  </div>
+  <div class="genre-bar" id="genre-bar">
+    <div class="gc on" onclick="filterG(null,this)" data-i18n="genre_all">Бүгд</div>
+  </div>
+  <div class="sec" id="rec-sec" style="display:none;">
+    <div class="sec-title" data-i18n="sec_rec">🎯 Танд санал болгох</div>
+    <div class="row-wrap"><button class="row-arrow left" onclick="scrollRow('rec-row',-1)">‹</button><div class="row" id="rec-row"></div><button class="row-arrow right" onclick="scrollRow('rec-row',1)">›</button></div>
+  </div>
+  <div class="sec">
+    <div class="sec-title" data-i18n="sec_trending">🔥 Trending</div>
+    <div class="row-wrap"><button class="row-arrow left" onclick="scrollRow('tr-row',-1)">‹</button><div class="row" id="tr-row">
+      <div class="sk"><div class="s si"></div><div class="s sl"></div><div class="s ss"></div></div>
+      <div class="sk"><div class="s si"></div><div class="s sl"></div><div class="s ss"></div></div>
+      <div class="sk"><div class="s si"></div><div class="s sl"></div><div class="s ss"></div></div>
+      <div class="sk"><div class="s si"></div><div class="s sl"></div><div class="s ss"></div></div>
+      <div class="sk"><div class="s si"></div><div class="s sl"></div><div class="s ss"></div></div>
+    </div><button class="row-arrow right" onclick="scrollRow('tr-row',1)">›</button></div>
+  </div>
+  <div class="sec">
+    <div class="sec-title" data-i18n="sec_top">⭐ Шилдэг</div>
+    <div class="row-wrap"><button class="row-arrow left" onclick="scrollRow('top-row',-1)">‹</button><div class="row" id="top-row">
+      <div class="sk"><div class="s si"></div><div class="s sl"></div><div class="s ss"></div></div>
+      <div class="sk"><div class="s si"></div><div class="s sl"></div><div class="s ss"></div></div>
+      <div class="sk"><div class="s si"></div><div class="s sl"></div><div class="s ss"></div></div>
+      <div class="sk"><div class="s si"></div><div class="s sl"></div><div class="s ss"></div></div>
+      <div class="sk"><div class="s si"></div><div class="s sl"></div><div class="s ss"></div></div>
+    </div><button class="row-arrow right" onclick="scrollRow('top-row',1)">›</button></div>
+  </div>
+  <div class="sec" id="history-sec" style="display:none;">
+    <div class="sec-title" data-i18n="sec_history">📺 Үргэлжлүүлэн үзэх</div>
+    <div class="row-wrap"><button class="row-arrow left" onclick="scrollRow('history-row',-1)">‹</button><div class="row" id="history-row"></div><button class="row-arrow right" onclick="scrollRow('history-row',1)">›</button></div>
+  </div>
+  </div>
+</div>
+
+<!-- ANIME PAGE -->
+<div class="page" id="anime-page">
+  <div class="sec">
+    <div class="sec-title" data-i18n="sec_anime_title">🎬 Үзэж болох аниме (Muse Asia)</div>
+    <div class="ep-grid" id="anime-ep-grid"></div>
+  </div>
+  <div class="sec">
+    <div class="sec-title" data-i18n="sec_browse">📂 Бүх аниме</div>
+    <div class="genre-bar" id="anime-genre-bar">
+      <div class="gc on" onclick="filterAnimeBrowse(null,this)" data-i18n="genre_all">Бүгд</div>
+    </div>
+    <div class="grid" id="anime-browse-grid">
+      <div class="sk"><div class="s si"></div><div class="s sl"></div><div class="s ss"></div></div>
+      <div class="sk"><div class="s si"></div><div class="s sl"></div><div class="s ss"></div></div>
+      <div class="sk"><div class="s si"></div><div class="s sl"></div><div class="s ss"></div></div>
+      <div class="sk"><div class="s si"></div><div class="s sl"></div><div class="s ss"></div></div>
+      <div class="sk"><div class="s si"></div><div class="s sl"></div><div class="s ss"></div></div>
+      <div class="sk"><div class="s si"></div><div class="s sl"></div><div class="s ss"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- MANGA PAGE -->
+<div class="page" id="manga-page">
+  <div style="padding:10px 20px 0;font-size:10px;color:var(--red);font-weight:700;letter-spacing:2px;" data-i18n="sec_manga_featured">⭐ ОНЦЛОХ</div>
+  <div class="op-feat" onclick="openOP()">
+    <div class="op-bg"></div>
+    <div class="op-ov2"></div>
+    <div class="op-inner">
+      <div class="op-cover">
+        <img src="https://uploads.mangadex.org/covers/a1c7c817-4e59-43b7-9365-09675a149a6f/58be9246-6a39-4f56-b838-a069c5aed304.jpg" onerror="this.parentElement.innerHTML='<div style=width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:32px>🏴</div>'">
+      </div>
+      <div>
+        <div class="op-label" data-i18n="op_manga_tag">🏴‍☠️ МАНГА • ONGOING</div>
+        <div class="op-title">ONE PIECE</div>
+        <div class="op-sub">Eiichiro Oda • Shonen Jump</div>
+        <div class="op-stats"><div class="op-st"><span data-i18n="op_chapter_l">Бүлэг</span>: <span>1100+</span></div><div class="op-st">⭐ <span>9.1</span></div></div>
+        <button class="op-btn" data-i18n="read_btn">📖 Унших</button>
+      </div>
+    </div>
+  </div>
+  <div class="sec"><div class="sec-title r" data-i18n="sec_manga_trending">🔥 Trending Манга</div><div class="row-wrap"><button class="row-arrow left" onclick="scrollRow('mtr-row',-1)">‹</button><div class="row" id="mtr-row"><div class="sk"><div class="s si"></div><div class="s sl"></div><div class="s ss"></div></div><div class="sk"><div class="s si"></div><div class="s sl"></div><div class="s ss"></div></div><div class="sk"><div class="s si"></div><div class="s sl"></div><div class="s ss"></div></div><div class="sk"><div class="s si"></div><div class="s sl"></div><div class="s ss"></div></div></div><button class="row-arrow right" onclick="scrollRow('mtr-row',1)">›</button></div></div>
+  <div class="sec"><div class="sec-title r" data-i18n="sec_manga_top">⭐ Шилдэг Манга</div><div class="row-wrap"><button class="row-arrow left" onclick="scrollRow('mtop-row',-1)">‹</button><div class="row" id="mtop-row"><div class="sk"><div class="s si"></div><div class="s sl"></div><div class="s ss"></div></div><div class="sk"><div class="s si"></div><div class="s sl"></div><div class="s ss"></div></div><div class="sk"><div class="s si"></div><div class="s sl"></div><div class="s ss"></div></div><div class="sk"><div class="s si"></div><div class="s sl"></div><div class="s ss"></div></div></div><button class="row-arrow right" onclick="scrollRow('mtop-row',1)">›</button></div></div>
+  <div class="sec"><div class="sec-title r" data-i18n="sec_manhwa">📖 Манхва</div><div class="row-wrap"><button class="row-arrow left" onclick="scrollRow('mhw-row',-1)">‹</button><div class="row" id="mhw-row"><div class="sk"><div class="s si"></div><div class="s sl"></div><div class="s ss"></div></div><div class="sk"><div class="s si"></div><div class="s sl"></div><div class="s ss"></div></div><div class="sk"><div class="s si"></div><div class="s sl"></div><div class="s ss"></div></div><div class="sk"><div class="s si"></div><div class="s sl"></div><div class="s ss"></div></div></div><button class="row-arrow right" onclick="scrollRow('mhw-row',1)">›</button></div></div>
+</div>
+
+<!-- WATCHLIST -->
+<div class="page" id="wl-page" style="padding:16px 20px;">
+  <div class="sec-title" style="margin-bottom:12px;" data-i18n="sec_wl">❤️ Миний жагсаалт</div>
+  <div class="grid" id="wl-grid"></div>
+  <div id="wl-empty" style="display:none;text-align:center;padding:40px;color:var(--text2);"><div style="font-size:36px;margin-bottom:8px;">📭</div><div data-i18n="wl_empty">Жагсаалт хоосон</div></div>
+</div>
+
+<!-- PROFILE PAGE -->
+<div class="page" id="profile-page">
+  <div id="profile-content"></div>
+</div>
+
+<!-- ADMIN PAGE -->
+<div class="page" id="admin-page">
+  <div id="admin-content"></div>
+</div>
+
+<!-- DONATE -->
+<div class="page" id="donate-page">
+  <div id="donate-content"></div>
+</div>
+
+<!-- TOP FANS -->
+<div class="page" id="fans-page">
+  <div id="fans-content"></div>
+</div>
+
+<!-- NOTIFICATIONS -->
+<div class="shop-ov" id="notif-ov" onclick="closeNotifOut(event)">
+  <div class="shop-box">
+    <button class="shop-close" onclick="closeNotifications()">✕</button>
+    <div id="notif-content"></div>
+  </div>
+</div>
+
+<!-- SHOP -->
+<div class="shop-ov" id="shop-ov" onclick="closeShopOut(event)">
+  <div class="shop-box">
+    <button class="shop-close" onclick="closeShop()">✕</button>
+    <div id="shop-content"></div>
+  </div>
+</div>
+
+<!-- REPORT -->
+<div class="shop-ov" id="report-ov" onclick="closeReportOut(event)">
+  <div class="shop-box">
+    <button class="shop-close" onclick="closeReport()">✕</button>
+    <div id="report-content"></div>
+  </div>
+</div>
+
+<!-- COMMENTS DRAWER -->
+<div class="comments-drawer" id="comments-drawer">
+  <div class="comments-header">
+    <span data-i18n="comments_title">💬 Сэтгэгдэл</span>
+    <button onclick="closeComments()">✕</button>
+  </div>
+  <div class="comments-list" id="comments-list"></div>
+  <div class="comments-input-row" id="comments-input-row">
+    <input type="text" id="comment-input" data-i18n-ph="comment_ph" placeholder="Сэтгэгдэл бичих..." onkeydown="if(event.key==='Enter')postComment();">
+    <button onclick="postComment()" data-i18n="comment_send">Илгээх</button>
+  </div>
+</div>
+
+<!-- AVATAR ZOOM -->
+<div class="avatar-zoom-ov" id="avatar-zoom-ov" onclick="closeAvatarZoom()">
+  <img id="avatar-zoom-img" src="" onclick="closeAvatarZoom()">
+</div>
+
+<!-- MODAL -->
+<div class="modal-ov" id="modal" onclick="closeModalOut(event)">
+  <div class="modal">
+    <div class="modal-banner" id="mb">
+      <div class="mbbg" id="mbbg"></div>
+      <div class="mbov"></div>
+      <button class="modal-x" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<!-- ONE PIECE MODAL -->
+<div class="modal-ov" id="op-modal" onclick="closeOPOut(event)">
+  <div class="modal">
+    <div class="modal-banner" style="background:linear-gradient(135deg,#3d0e00,#1a0500);">
+      <img src="https://uploads.mangadex.org/covers/a1c7c817-4e59-43b7-9365-09675a149a6f/58be9246-6a39-4f56-b838-a069c5aed304.jpg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.25;" onerror="this.style.display='none'">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,#1a1a1a,transparent 60%);"></div>
+      <button class="modal-x" onclick="closeOP()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="mt">🏴‍☠️ One Piece</div>
+      <div class="me2">ワンピース • Eiichiro Oda</div>
+      <div class="mstats"><div class="ms"><span data-i18n="op_chapter_l">Бүлэг</span>: <span>1100+</span></div><div class="ms"><span data-i18n="rating">Үнэлгээ</span>: <span>⭐ 9.1</span></div><div class="ms"><span data-i18n="status_l">Статус</span>: <span data-i18n="op_status">Гарж байна</span></div></div>
+      <div class="mgenres"><span class="mg r" data-mn="Экшн" data-en="Action">Экшн</span><span class="mg r" data-mn="Адал явдал" data-en="Adventure">Адал явдал</span><span class="mg r" data-mn="Инээдмийн" data-en="Comedy">Инээдмийн</span><span class="mg r" data-mn="Фэнтэзи" data-en="Fantasy">Фэнтэзи</span></div>
+      <div class="mdesc" data-mn="Монки Д. Луффи далайн эзэн болж, Алтан Нэгмэлийг олж, Далайн Хааны титэл хүсдэг. Гайхамшигт хамт олноо бүрдүүлж явдаг аварга том адал явдал." data-en="Monkey D. Luffy dreams of becoming the Pirate King and finding the legendary One Piece treasure, gathering an extraordinary crew along the way.">Монки Д. Луффи далайн эзэн болж, Алтан Нэгмэлийг олж, Далайн Хааны титэл хүсдэг. Гайхамшигт хамт олноо бүрдүүлж явдаг аварга том адал явдал.</div>
+      <div class="mactions">
+        <button class="btn-a ru" style="flex:1;" onclick="closeOP();startReader(0)" data-i18n="read_btn">📖 Унших</button>
+        <button class="btn-sec" onclick="addOPToWL(this)" data-i18n="add_wl">+ Жагсаалтад нэм</button>
+      </div>
+      <div class="ch-list"><div class="ch-title2" data-i18n="op_chapters">📑 Бүлгүүд</div><div id="op-ch"><div class="spin-wrap"><div class="spin"></div></div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- VIDEO PLAYER -->
+<div class="player-overlay" id="player">
+  <div class="player-nav">
+    <button class="p-close" onclick="closePlayer()" data-i18n="btn_back">← Буцах</button>
+    <div class="player-title" id="player-title">...</div>
+    <button class="player-icon-btn" onclick="openComments()" title="Comments">💬</button>
+    <button class="player-icon-btn" onclick="openReport(curAnime&&curAnime.id, curAnime&&curAnime.title)" title="Report">📢</button>
+    <a class="p-close" id="yt-watch-link" href="#" target="_blank" rel="noopener" style="text-decoration:none;display:inline-block;">▶ YouTube</a>
+    <button class="p-close" onclick="closePlayer()" data-i18n="btn_close">✕</button>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;">
+    <iframe class="yt-frame" id="yt-frame" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+    <div class="ep-bar" id="ep-bar"></div>
+  </div>
+</div>
+
+<!-- MANGA READER -->
+<div class="reader-ov" id="reader">
+  <div class="reader-nav">
+    <button class="p-close" onclick="closeReader()" data-i18n="btn_back">← Буцах</button>
+    <div class="reader-title" id="r-title">One Piece</div>
+    <button class="r-btn" onclick="prevCh()" data-i18n="prev_ch">‹ Өмнөх</button>
+    <select class="r-sel" id="r-sel" onchange="loadCh(this.value)"></select>
+    <button class="r-btn" onclick="nextCh()" data-i18n="next_ch">Дараах ›</button>
+    <button class="p-close" onclick="closeReader()" data-i18n="btn_close">✕</button>
+  </div>
+  <div class="reader-body" id="r-body"><div class="r-info" data-i18n="loading">Ачааллаж байна...</div></div>
+</div>
+
+<div class="toast" id="toast-el"></div>
+<div class="footer" data-i18n="footer">AniGem © 2026 · AniList · MangaDex · Muse Asia</div>
+
+<script>
+// ==================== FIREBASE ====================
+const firebaseConfig = {
+  apiKey: "AIzaSyDVjc3jyYaneN3e_WUWAUsrt3fOE0zc3bA",
+  authDomain: "anistream-b0bed.firebaseapp.com",
+  projectId: "anistream-b0bed",
+  storageBucket: "anistream-b0bed.firebasestorage.app",
+  messagingSenderId: "373425131512",
+  appId: "1:373425131512:web:410af5a7fa11337dfb900d",
+  measurementId: "G-MT32FN1BGG"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+const ADMIN_EMAIL = 'munkhtulga2021@gmail.com';
+
+// ==================== USER STATE ====================
+var currentUser = null;
+var wl = JSON.parse(localStorage.getItem('as_wl') || '[]');
+var watchHistory = JSON.parse(localStorage.getItem('as_history') || '[]');
+var watchStats = JSON.parse(localStorage.getItem('as_stats') || '{}');
+var sessionStart = null;
+var sessionAnime = null;
+var saveTimer = null;
+var lang = localStorage.getItem('as_lang') || 'mn';
+
+// ==================== I18N ====================
+var STRINGS = {
+  mn: {
+    nav_home:'🏠 Нүүр', nav_anime:'🎬 Аниме', nav_manga:'📚 Манга', nav_wl:'❤️ Жагсаалт',
+    search_ph:'Хайх...', login_btn:'Нэвтрэх', wl_btn:'❤️ Жагсаалт',
+    login_sub:'Имэйлээрээ бүртгүүлж эхэл',
+    tab_login:'Нэвтрэх', tab_signup:'Бүртгүүлэх',
+    label_email:'Имэйл', label_pass:'Нууц үг',
+    forgot:'Нууц үгээ мартсан?', login_submit:'Нэвтрэх',
+    label_name:'Нэр', label_email_gmail:'Имэйл (Gmail)', label_pass6:'Нууц үг (6+ тэмдэгт)', label_pass2:'Нууц үг давтах',
+    signup_submit:'Бүртгүүлэх', ph_name:'Таны нэр',
+    lf1:'Watchlist хадгалах', lf2:'Уншсан манга', lf3:'Үзсэн аниме',
+    skip:'Одоохондоо алгасах →',
+    sec_trending:'🔥 Trending', sec_top:'⭐ Шилдэг', sec_history:'📺 Үргэлжлүүлэн үзэх', sec_rec:'🎯 Танд санал болгох', sec_search:'🔍 Хайлт', sec_top_fans:'🏆 Шилдэг үзэгчид', genre_all:'Бүгд',
+    sec_anime_title:'🎬 Үзэж болох аниме (Muse Asia)', sec_browse:'📂 Бүх аниме',
+    sec_manga_featured:'⭐ ОНЦЛОХ', sec_manga_trending:'🔥 Trending Манга', sec_manga_top:'⭐ Шилдэг Манга', sec_manhwa:'📖 Манхва',
+    sec_wl:'❤️ Миний жагсаалт', wl_empty:'Жагсаалт хоосон',
+    details_btn:'▶ Дэлгэрэнгүй', add_wl:'+ Жагсаалтад нэм', in_wl:'✓ Жагсаалтад бий',
+    ep_label:'эпизод', ep_short:'эп',
+    rating:'Үнэлгээ', episodes_l:'Эпизод', year_l:'Он', studio_l:'Студи', no_desc:'Тайлбар байхгүй.',
+    watch_anime_btn:'🎬 Аниме үзэх', read_btn:'📖 Унших', not_yet:'Тун удахгүй стриминг нэмэгдэнэ! 🎬',
+    op_chapters:'📑 Бүлгүүд', op_chapter_l:'Бүлэг', op_added:'жагсаалтад нэмэгдлээ ❤️',
+    profile_login_prompt:'Профайл харахын тулд нэвтэрнэ үү', login_signup_btn:'Нэвтрэх / Бүртгүүлэх',
+    joined:'-нд нэгдсэн', fan_badge:'🎌 Аниме фан', verified:'✓ Баталгаажсан', unverified:'⚠ Баталгаажаагүй',
+    verify_msg:'⚠️ Имэйл хаягаа баталгаажуулаагүй байна. Inbox-оо шалгаарай.', resend:'Дахин илгээх',
+    stat_wl:'Жагсаалт', stat_watched:'Үзсэн', stat_done:'Дуусгасан',
+    settings_title:'Тохиргоо', logout:'🚪 Гарах', admin_panel:'👑 Admin Panel',
+    profile_wl_empty:'Жагсаалт хоосон байна',
+    theme_title:'🎨 Дизайн',
+    admin_dashboard:'👑 Admin Dashboard', back_profile:'← Профайл', admin_only:'Энэ хуудас зөвхөн admin-д зориулагдсан',
+    back_home:'Нүүр рүү буцах', total_users:'Нийт хэрэглэгч', total_minutes:'Нийт минут үзсэн',
+    admin_wl:'❤️ Жагсаалт', admin_watched:'🎬 Үзсэн аниме', empty:'Хоосон', no_users:'Хэрэглэгч олдсонгүй', no_watched:'Үзсэн зүйл байхгүй',
+    you_badge:'👑 Та', min_l:'мин',
+    btn_back:'← Буцах', btn_close:'✕', prev_ch:'‹ Өмнөх', next_ch:'Дараах ›', loading:'Ачааллаж байна...',
+    no_pages:'Хуудас олдсонгүй.', retry:'Алдаа. Дахин оролдоно уу.', first_ch:'Эхний бүлэг!', last_ch:'Сүүлийн бүлэг!',
+    added_wl:'Жагсаалтад нэмэгдлээ ❤️', removed_wl:'Жагсаалтаас хасагдлаа',
+    logged_out:'Гарлаа. Баяртай! 👋', welcome:'Тавтай морил, ',
+    op_manga_tag:'🏴‍☠️ МАНГА • ONGOING', op_status:'Гарж байна', status_l:'Статус',
+    err_name:'Нэрээ оруулна уу.', err_email:'Имэйл хаягаа оруулна уу.', err_pass6:'Нууц үг 6-аас доошгүй тэмдэгт байх ёстой.',
+    err_pass_match:'Нууц үг таарахгүй байна.', err_email_pass:'Имэйл болон нууц үгээ оруулна уу.', err_email_only:'Имэйл хаягаа дээр бичээд дарна уу.',
+    signup_success:'Бүртгэл амжилттай! 📧 Имэйлээ шалгаж баталгаажуулна уу.', reset_sent:'Нууц үг сэргээх имэйл явуулсан 📧',
+    registering:'Бүртгэж байна...', logging_in:'Нэвтэрч байна...',
+    e_already:'Энэ имэйл хаягаар өмнө нь бүртгүүлсэн байна.', e_inv_email:'Имэйл хаяг буруу байна.', e_weak:'Нууц үг хэт хялбар байна (6+ тэмдэгт).',
+    e_no_user:'Хэрэглэгч олдсонгүй. Бүртгүүлсэн үү?', e_wrong_pass:'Нууц үг буруу байна.', e_inv_cred:'Имэйл эсвэл нууц үг буруу байна.',
+    e_too_many:'Хэт олон оролдлого хийсэн. Түр хүлээгээрэй.', e_missing_email:'Имэйл хаягаа оруулна уу.', e_generic:'Алдаа гарлаа. Дахин оролдоно уу.',
+    e_resend:'Баталгаажуулах имэйл дахин явуулсан 📧', e_resend_fail:'Алдаа гарлаа. Түр хүлээгээд дахин оролдоно уу.',
+    conn_error:'Холболт алдаатай.', total_chapters:'Нийт {n} бүлэг', unnamed_user:'Хэрэглэгч', ep_abbr:'эп',
+    your_id:'ID', country_breakdown:'🌍 Улс орнуудаар', total_time_l:'Нийт хугацаа',
+    photo_updated:'Профайл зураг шинэчлэгдлээ 📷', photo_err_type:'Зурган файл сонгоно уу.', photo_err_size:'Файлын хэмжээ 5MB-аас бага байх ёстой.', change_photo:'Зураг солих',
+    no_results:'Уучлаарай, одоогоор байхгүй байна 😔',
+    adv_all_genre:'Бүх төрөл', adv_all_format:'Бүх формат', adv_all_year:'Бүх он',
+    shop_title:'🛍️ Дэлгүүр', shop_label:'Дэлгүүр', your_points:'Оноо',
+    item_noads:'1 сар Ads-чөлөөтэй', item_firename:'🔥 Галт нэр', item_firebg:'🔥 Галт фон', item_glitterid:'💎 Гялбаа ID',
+    buy_btn:'Авах', owned:'✓ Эзэмшсэн', active_until:'хүртэл идэвхтэй',
+    not_enough_points:'Оноо хүрэхгүй байна 😢', purchase_success:'Амжилттай авлаа! 🎉',
+    invite_title:'👥 Найзаа урих', invite_desc:'Найз чинь холбоосоор бүртгүүлж, имэйлээ баталгаажуулбал чи 10 оноо авна',
+    copy_link:'Хуулах', link_copied:'Холбоос хуулагдлаа! 📋',
+    referral_bonus:'Найз чинь баталгаажсан тул чи +10 оноо авлаа! 🎉',
+    how_to_earn:'Хэрхэн оноо цуглуулах вэ?',
+    earn_watch:'🎬 Аниме үзэх — минут тутамд +1 оноо',
+    earn_invite:'👥 Найз урих — баталгаажсан бүр +10 оноо',
+    shop_login_required:'Дэлгүүр ашиглахын тулд нэвтэрнэ үү',
+    ban_btn:'🚫 Хориглох', unban_btn:'✅ Хориг арилгах', verify_btn:'✓ Баталгаажуулах', already_verified:'✓ Баталгаажсан',
+    gift_btn:'🎁 Өгөх', gift_desc:'Энэ хэрэглэгчид сонгосон зүйлийг үнэгүй өгнө', gift_sent:'Бэлэг илгээгдлээ! 🎁',
+    banned_badge:'🚫 Хориглогдсон', banned_msg:'Таны акаунт хориглогдсон байна. Админтай холбогдоно уу.',
+    confirm_ban:'Энэ хэрэглэгчийг хориглох уу?', confirm_unban:'Хоригийг арилгах уу?',
+    admin_gift_title:'🎁 Бэлэг өгөх',
+    report_title:'📢 Тайлан илгээх', report_btn:'📢 Тайлан',
+    report_type1:'🐢 Сайт гацаж байна', report_type2:'🎬 Аниме үзэхэд асуудал байна', report_type3:'🔇 Бичлэг тоглохгүй / орчуулга-дуу зөрсөн', report_type4:'✏️ Бусад',
+    report_other_ph:'Тайлбарлаж бичнэ үү...', report_submit:'Илгээх', report_sent:'Тайлан илгээгдлээ. Баярлалаа! 📨',
+    report_pick_type:'Төрөл сонгож, шаардлагатай бол тайлбар бичнэ үү',
+    my_reports:'📋 Миний тайлангууд', no_reports:'Тайлан байхгүй',
+    report_status_open:'🟡 Шинэ', report_status_resolved:'✓ Шийдвэрлэгдсэн', report_resolve:'✓ Шийдвэрлэсэн гэж тэмдэглэх',
+    admin_reports:'📢 Тайлангууд',
+    comments_title:'💬 Сэтгэгдэл', comment_ph:'Сэтгэгдэл бичих...', comment_send:'Илгээх',
+    comment_login_required:'Сэтгэгдэл бичихийн тулд нэвтэрнэ үү', no_comments:'Одоогоор сэтгэгдэл алга. Эхнийх нь бич!',
+    delete_comment:'Устгах', confirm_delete_comment:'Энэ сэтгэгдлийг устгах уу?',
+    notif_title:'🔔 Мэдэгдэл', notif_empty:'Мэдэгдэл байхгүй',
+    notif_report_resolved:'Таны "{type}" төрлийн тайлан шийдвэрлэгдлээ ✓',
+    notif_gift:'Чи "{item}" авлаа! 🎁',
+    notif_referral:'Найз чинь баталгаажсан тул чи +10 оноо авлаа! 🎉',
+    admin_announce_title:'📢 Бүх хэрэглэгчид мэдэгдэл илгээх',
+    admin_announce_ph:'Мэдэгдлийн текстээ бичнэ үү...',
+    admin_announce_send:'Илгээх', announce_sent:'Мэдэгдэл бүх хэрэглэгчид илгээгдлээ! 📨',
+    fans_minutes_watched:'мин үзсэн', top_fans_empty:'Одоогоор хэрэглэгч байхгүй',
+    donate_title:'💝 Дэмжих', donate_btn:'💝 Хандив өгөх',
+    donate_desc:'$1 хандив = 100 оноо. Доорх мэдээллээр шилжүүлэг хийгээд, хэдэн доллар илгээсэнээ бичээд мэдэгдээрэй. Admin шалгасны дараа оноо автоматаар нэмэгдэнэ.',
+    donate_info_title:'🏦 Шилжүүлэх мэдээлэл',
+    donate_amount_label:'Илгээсэн дүн ($)', donate_amount_ph:'Жишээ: 5',
+    donate_note_ph:'Тэмдэглэл (нэр, гүйлгээний утга бичсэн эсэх г.м)',
+    donate_submit:'Илгээсэн гэж мэдэгдэх',
+    donate_sent:'Хүсэлт илгээгдлээ! Admin шалгасны дараа оноо нэмэгдэнэ. 🙏',
+    donate_invalid:'Зөв дүн оруулна уу',
+    my_donations:'📋 Миний хандивууд', no_donations:'Хандив байхгүй',
+    donation_status_pending:'🟡 Хүлээгдэж буй', donation_status_approved:'✓ Баталгаажсан',
+    admin_donations:'💝 Хандивууд', donation_approve_pts:'оноо',
+    notif_donation_approved:'Таны ${amount} хандив баталгаажиж, +{pts} оноо нэмэгдлээ! 🎉',
+    footer:'AniGem © 2026 · AniList · MangaDex · Muse Asia'
+  },
+  en: {
+    nav_home:'🏠 Home', nav_anime:'🎬 Anime', nav_manga:'📚 Manga', nav_wl:'❤️ Watchlist',
+    search_ph:'Search...', login_btn:'Log in', wl_btn:'❤️ Watchlist',
+    login_sub:'Sign up with your email to get started',
+    tab_login:'Log In', tab_signup:'Sign Up',
+    label_email:'Email', label_pass:'Password',
+    forgot:'Forgot your password?', login_submit:'Log In',
+    label_name:'Name', label_email_gmail:'Email (Gmail)', label_pass6:'Password (6+ chars)', label_pass2:'Confirm password',
+    signup_submit:'Sign Up', ph_name:'Your name',
+    lf1:'Save watchlist', lf2:'Manga read', lf3:'Anime watched',
+    skip:'Skip for now →',
+    sec_trending:'🔥 Trending', sec_top:'⭐ Top Rated', sec_history:'📺 Continue Watching', sec_rec:'🎯 Recommended for You', sec_search:'🔍 Search results', sec_top_fans:'🏆 Top Fans', genre_all:'All',
+    sec_anime_title:'🎬 Watchable Anime (Muse Asia)', sec_browse:'📂 All Anime',
+    sec_manga_featured:'⭐ FEATURED', sec_manga_trending:'🔥 Trending Manga', sec_manga_top:'⭐ Top Manga', sec_manhwa:'📖 Manhwa',
+    sec_wl:'❤️ My Watchlist', wl_empty:'Watchlist is empty',
+    details_btn:'▶ Details', add_wl:'+ Add to list', in_wl:'✓ In list',
+    ep_label:'episodes', ep_short:'ep',
+    rating:'Rating', episodes_l:'Episodes', year_l:'Year', studio_l:'Studio', no_desc:'No description.',
+    watch_anime_btn:'🎬 Watch Anime', read_btn:'📖 Read', not_yet:'Streaming coming soon! 🎬',
+    op_chapters:'📑 Chapters', op_chapter_l:'Chapter', op_added:'added to watchlist ❤️',
+    profile_login_prompt:'Log in to view your profile', login_signup_btn:'Log In / Sign Up',
+    joined:' joined', fan_badge:'🎌 Anime fan', verified:'✓ Verified', unverified:'⚠ Unverified',
+    verify_msg:'⚠️ Your email is not verified. Check your inbox.', resend:'Resend',
+    stat_wl:'Watchlist', stat_watched:'Watched', stat_done:'Completed',
+    settings_title:'Settings', logout:'🚪 Log Out', admin_panel:'👑 Admin Panel',
+    profile_wl_empty:'Watchlist is empty',
+    theme_title:'🎨 Theme',
+    admin_dashboard:'👑 Admin Dashboard', back_profile:'← Profile', admin_only:'This page is for admins only',
+    back_home:'Back to Home', total_users:'Total Users', total_minutes:'Total Minutes Watched',
+    admin_wl:'❤️ Watchlist', admin_watched:'🎬 Watched Anime', empty:'Empty', no_users:'No users found', no_watched:'Nothing watched yet',
+    you_badge:'👑 You', min_l:'min',
+    btn_back:'← Back', btn_close:'✕', prev_ch:'‹ Prev', next_ch:'Next ›', loading:'Loading...',
+    no_pages:'No pages found.', retry:'Error. Please try again.', first_ch:'This is the first chapter!', last_ch:'This is the last chapter!',
+    added_wl:'Added to watchlist ❤️', removed_wl:'Removed from watchlist',
+    logged_out:'Logged out. Bye! 👋', welcome:'Welcome, ',
+    op_manga_tag:'🏴‍☠️ MANGA • ONGOING', op_status:'Ongoing', status_l:'Status',
+    err_name:'Please enter your name.', err_email:'Please enter your email.', err_pass6:'Password must be at least 6 characters.',
+    err_pass_match:'Passwords do not match.', err_email_pass:'Please enter your email and password.', err_email_only:'Please enter your email above first.',
+    signup_success:'Account created! 📧 Check your email to verify.', reset_sent:'Password reset email sent 📧',
+    registering:'Signing up...', logging_in:'Logging in...',
+    e_already:'This email is already registered.', e_inv_email:'Invalid email address.', e_weak:'Password is too weak (6+ characters).',
+    e_no_user:'User not found. Did you sign up?', e_wrong_pass:'Incorrect password.', e_inv_cred:'Invalid email or password.',
+    e_too_many:'Too many attempts. Please wait a bit.', e_missing_email:'Please enter your email.', e_generic:'Something went wrong. Please try again.',
+    e_resend:'Verification email resent 📧', e_resend_fail:'Something went wrong. Please try again later.',
+    conn_error:'Connection error.', total_chapters:'Total: {n} chapters', unnamed_user:'User', ep_abbr:'ep',
+    your_id:'ID', country_breakdown:'🌍 By Country', total_time_l:'Total Time',
+    photo_updated:'Profile photo updated 📷', photo_err_type:'Please choose an image file.', photo_err_size:'File must be smaller than 5MB.', change_photo:'Change photo',
+    no_results:'Sorry, not available right now 😔',
+    adv_all_genre:'All Genres', adv_all_format:'All Formats', adv_all_year:'All Years',
+    shop_title:'🛍️ Shop', shop_label:'Shop', your_points:'Points',
+    item_noads:'1 Month Ad-Free', item_firename:'🔥 Fire Name', item_firebg:'🔥 Fire Background', item_glitterid:'💎 Glitter ID',
+    buy_btn:'Buy', owned:'✓ Owned', active_until:'active until',
+    not_enough_points:'Not enough points 😢', purchase_success:'Purchased successfully! 🎉',
+    invite_title:'👥 Invite a Friend', invite_desc:'If your friend signs up with your link and verifies their email, you get 10 points',
+    copy_link:'Copy', link_copied:'Link copied! 📋',
+    referral_bonus:'Your friend verified — you earned +10 points! 🎉',
+    how_to_earn:'How to earn points?',
+    earn_watch:'🎬 Watch anime — +1 point per minute',
+    earn_invite:'👥 Invite a friend — +10 points per verified signup',
+    shop_login_required:'Log in to use the shop',
+    ban_btn:'🚫 Ban', unban_btn:'✅ Unban', verify_btn:'✓ Verify', already_verified:'✓ Verified',
+    gift_btn:'🎁 Give', gift_desc:'Give the selected item to this user for free', gift_sent:'Gift sent! 🎁',
+    banned_badge:'🚫 Banned', banned_msg:'Your account has been banned. Please contact the admin.',
+    confirm_ban:'Ban this user?', confirm_unban:'Unban this user?',
+    admin_gift_title:'🎁 Give a Gift',
+    report_title:'📢 Send Report', report_btn:'📢 Report',
+    report_type1:'🐢 Site is lagging', report_type2:'🎬 Problem watching anime', report_type3:"🔇 Video won't play / audio-subtitle mismatch", report_type4:'✏️ Other',
+    report_other_ph:'Please describe...', report_submit:'Submit', report_sent:'Report sent. Thank you! 📨',
+    report_pick_type:'Please pick a type, and a description if needed',
+    my_reports:'📋 My Reports', no_reports:'No reports yet',
+    report_status_open:'🟡 New', report_status_resolved:'✓ Resolved', report_resolve:'✓ Mark resolved',
+    admin_reports:'📢 Reports',
+    comments_title:'💬 Comments', comment_ph:'Write a comment...', comment_send:'Send',
+    comment_login_required:'Log in to comment', no_comments:'No comments yet. Be the first!',
+    delete_comment:'Delete', confirm_delete_comment:'Delete this comment?',
+    notif_title:'🔔 Notifications', notif_empty:'No notifications',
+    notif_report_resolved:'Your "{type}" report has been resolved ✓',
+    notif_gift:'You received "{item}"! 🎁',
+    notif_referral:'Your friend verified — you earned +10 points! 🎉',
+    admin_announce_title:'📢 Send Announcement to All Users',
+    admin_announce_ph:'Write your announcement...',
+    admin_announce_send:'Send', announce_sent:'Announcement sent to all users! 📨',
+    fans_minutes_watched:'min watched', top_fans_empty:'No users yet',
+    donate_title:'💝 Donate', donate_btn:'💝 Donate',
+    donate_desc:'$1 donation = 100 points. Transfer using the info below, then submit how many dollars you sent. The admin will verify and add points.',
+    donate_info_title:'🏦 Transfer Info',
+    donate_amount_label:'Amount sent ($)', donate_amount_ph:'e.g. 5',
+    donate_note_ph:'Note (your name, transfer reference, etc.)',
+    donate_submit:'Notify admin',
+    donate_sent:'Request sent! Points will be added after admin verification. 🙏',
+    donate_invalid:'Please enter a valid amount',
+    my_donations:'📋 My Donations', no_donations:'No donations yet',
+    donation_status_pending:'🟡 Pending', donation_status_approved:'✓ Approved',
+    admin_donations:'💝 Donations', donation_approve_pts:'points',
+    notif_donation_approved:'Your ${amount} donation was approved — +{pts} points! 🎉',
+    footer:'AniGem © 2026 · AniList · MangaDex · Muse Asia'
+  }
+};
+function t(key){ return (STRINGS[lang] && STRINGS[lang][key]) || STRINGS.mn[key] || key; }
+
+// ==================== THEMES ====================
+var THEMES = {
+  purple: { accent:'#a855f7', accent2:'#7c3aed', pink:'#ec4899', red:'#f43f5e', grad:'linear-gradient(135deg,#a855f7,#ec4899)', gradr:'linear-gradient(135deg,#f43f5e,#fb7185)', text:'#fff' },
+  blue:   { accent:'#3b82f6', accent2:'#1d4ed8', pink:'#06b6d4', red:'#f43f5e', grad:'linear-gradient(135deg,#3b82f6,#06b6d4)', gradr:'linear-gradient(135deg,#f43f5e,#fb7185)', text:'#fff' },
+  green:  { accent:'#22c55e', accent2:'#15803d', pink:'#a3e635', red:'#f43f5e', grad:'linear-gradient(135deg,#22c55e,#a3e635)', gradr:'linear-gradient(135deg,#f43f5e,#fb7185)', text:'#fff' },
+  orange: { accent:'#f97316', accent2:'#c2410c', pink:'#fbbf24', red:'#ef4444', grad:'linear-gradient(135deg,#f97316,#fbbf24)', gradr:'linear-gradient(135deg,#ef4444,#fb923c)', text:'#fff' },
+  rose:   { accent:'#f43f5e', accent2:'#be123c', pink:'#fb7185', red:'#ec4899', grad:'linear-gradient(135deg,#f43f5e,#fb7185)', gradr:'linear-gradient(135deg,#ec4899,#f472b6)', text:'#fff' },
+  cyan:   { accent:'#06b6d4', accent2:'#0e7490', pink:'#67e8f9', red:'#f43f5e', grad:'linear-gradient(135deg,#06b6d4,#67e8f9)', gradr:'linear-gradient(135deg,#f43f5e,#fb7185)', text:'#fff' },
+  black:  { accent:'#52525b', accent2:'#18181b', pink:'#71717a', red:'#dc2626', grad:'linear-gradient(135deg,#52525b,#18181b)', gradr:'linear-gradient(135deg,#dc2626,#991b1b)', text:'#fff' },
+  gray:   { accent:'#9ca3af', accent2:'#52525b', pink:'#d1d5db', red:'#ef4444', grad:'linear-gradient(135deg,#9ca3af,#6b7280)', gradr:'linear-gradient(135deg,#ef4444,#b91c1c)', text:'#18181b' },
+  white:  { accent:'#e4e4e7', accent2:'#a1a1aa', pink:'#f4f4f5', red:'#ef4444', grad:'linear-gradient(135deg,#fafafa,#d4d4d8)', gradr:'linear-gradient(135deg,#ef4444,#b91c1c)', text:'#18181b' }
+};
+function applyTheme(name) {
+  var th = THEMES[name]; if (!th) return;
+  var r = document.documentElement.style;
+  r.setProperty('--accent', th.accent);
+  r.setProperty('--accent2', th.accent2);
+  r.setProperty('--pink', th.pink);
+  r.setProperty('--red', th.red);
+  r.setProperty('--grad', th.grad);
+  r.setProperty('--grad-r', th.gradr);
+  r.setProperty('--text-on-accent', th.text || '#fff');
+  localStorage.setItem('as_theme', name);
+  document.querySelectorAll('.theme-dot').forEach(function(d){ d.classList.toggle('on', d.dataset.theme===name); });
+}
+
+function updateLeaderboardEntry() {
+  if (!currentUser) return;
+  var totalSec = 0;
+  Object.keys(watchStats).forEach(function(k){ totalSec += watchStats[k].totalSec || 0; });
+  var totalMin = Math.floor(totalSec/60);
+  db.collection('leaderboard').doc(currentUser.uid).set({
+    name: currentUser.displayName || currentUser.email || '',
+    photoURL: currentUserPhoto || null,
+    userId: currentUserId,
+    totalMinutes: totalMin
+  }).then(function(){ renderTopFans(); }).catch(function(){});
+}
+
+function openTopFans(){ goPage('fans'); }
+
+function renderTopFans() {
+  var el = document.getElementById('fans-content');
+  if (!el) return;
+  var header = '<div class="admin-header fire-bg" style="justify-content:center;position:relative;"><button class="admin-back" style="position:absolute;left:22px;" onclick="goPage(\'home\')">'+t('back_profile')+'</button><div class="at fire-name">🔥 '+t('sec_top_fans')+' 🔥</div></div>';
+  el.innerHTML = header+'<div style="padding:20px;"><div class="spin-wrap"><div class="spin"></div></div></div>';
+  db.collection('leaderboard').get().then(function(snap){
+    var list = [];
+    snap.forEach(function(doc){ list.push(doc.data()); });
+    list.sort(function(a,b){ return (b.totalMinutes||0) - (a.totalMinutes||0); });
+    list = list.filter(function(u){ return (u.totalMinutes||0) > 0; }).slice(0,10);
+    var html = '<div style="padding:20px;max-width:600px;margin:0 auto;">';
+    if (list.length === 0) {
+      html += '<div class="admin-empty-small">'+t('top_fans_empty')+'</div>';
+    } else {
+      var medals = ['🥇','🥈','🥉'];
+      html += list.map(function(u,i){
+        var rank = medals[i] || (i+1)+'.';
+        var avatar = u.photoURL ? '<img class="leaderboard-avatar" src="'+u.photoURL+'">' : '<div class="leaderboard-avatar-ph">'+((u.name||'?').charAt(0).toUpperCase())+'</div>';
+        return '<div class="leaderboard-item"><div class="leaderboard-rank">'+rank+'</div>'+avatar+
+          '<div class="leaderboard-info"><div class="leaderboard-name id-glitter">'+escapeHtml(u.name||t('unnamed_user'))+'</div>'+
+          '<div class="leaderboard-minutes">'+(u.totalMinutes||0)+' '+t('fans_minutes_watched')+'</div></div></div>';
+      }).join('');
+    }
+    html += '</div>';
+    el.innerHTML = header + html;
+  }).catch(function(err){ el.innerHTML = header+'<div style="padding:20px;"><div class="admin-empty-small">'+err.message+'</div></div>'; });
+}
+
+// ==================== HORIZONTAL ROW SCROLL ====================
+function scrollRow(id, dir) {
+  var row = document.getElementById(id);
+  if (!row) return;
+  row.scrollBy({ left: dir * Math.round(row.clientWidth * 0.85), behavior: 'smooth' });
+}
+
+function enableRowScroll() {
+  document.addEventListener('wheel', function(e){
+    var row = e.target.closest && e.target.closest('.row');
+    if (!row) return;
+    if (row.scrollWidth <= row.clientWidth) return;
+    if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+      row.scrollLeft += e.deltaY;
+      e.preventDefault();
+    }
+  }, { passive: false });
+}
+function epTitle(num, title) {
+  return lang==='en' ? ('Episode '+num+': '+title) : (num+'-р эпизод: '+title);
+}
+function epShort(num) {
+  return lang==='en' ? ('Ep '+num) : (num+'-р эп');
+}
+
+function toggleLang() {
+  lang = lang === 'mn' ? 'en' : 'mn';
+  localStorage.setItem('as_lang', lang);
+  applyLanguage();
+}
+
+function applyLanguage() {
+  document.querySelectorAll('[data-i18n]').forEach(function(el){ el.textContent = t(el.getAttribute('data-i18n')); });
+  document.querySelectorAll('[data-i18n-ph]').forEach(function(el){ el.placeholder = t(el.getAttribute('data-i18n-ph')); });
+  document.querySelectorAll('[data-mn][data-en]').forEach(function(el){ el.textContent = lang==='en' ? el.getAttribute('data-en') : el.getAttribute('data-mn'); });
+  updateNavUser();
+  document.querySelectorAll('#genre-bar .gc[data-genre]').forEach(function(c){ c.textContent = GT(c.dataset.genre); });
+  document.querySelectorAll('#anime-genre-bar .gc[data-genre]').forEach(function(c){ c.textContent = GT(c.dataset.genre); });
+  if (lastHero) renderHero(lastHero);
+  if (lastTrendingList) renderRow('tr-row', lastTrendingList.slice(0,12), false);
+  if (lastTopList) renderRow('top-row', lastTopList, false);
+  if (document.getElementById('home-page').style.display !== 'none') { renderHistoryRow(); renderRecommendations(); }
+  if (document.getElementById('anime-page').classList.contains('on')) renderAnimeEpGrid();
+  if (document.getElementById('wl-page').classList.contains('on')) loadWL();
+  if (document.getElementById('profile-page').classList.contains('on')) renderProfile();
+  if (document.getElementById('admin-page').classList.contains('on')) renderAdmin();
+  if (document.getElementById('shop-ov').classList.contains('on')) renderShopContent();
+  if (document.getElementById('notif-ov').classList.contains('on')) renderNotifications();
+  if (document.getElementById('fans-page').classList.contains('on')) renderTopFans();
+  if (document.getElementById('report-ov').classList.contains('on')) renderReportContent();
+  if (document.getElementById('comments-drawer').classList.contains('on') && curAnime) loadComments(curAnime.id);
+  if (curAnime) {
+    var ep = curAnime.episodes[curEpIdx];
+    document.getElementById('player-title').textContent = epTitle(ep.num, ep.title);
+    renderEpBar2();
+  }
+}
+
+// ==================== EMAIL AUTH ====================
+function switchAuthTab(tab) {
+  document.getElementById('tab-login').classList.toggle('active', tab==='login');
+  document.getElementById('tab-signup').classList.toggle('active', tab==='signup');
+  document.getElementById('form-login').classList.toggle('active', tab==='login');
+  document.getElementById('form-signup').classList.toggle('active', tab==='signup');
+  document.getElementById('login-err').textContent = '';
+  document.getElementById('signup-err').textContent = '';
+}
+
+function fbErr(code) {
+  var m = {
+    'auth/email-already-in-use': t('e_already'),
+    'auth/invalid-email': t('e_inv_email'),
+    'auth/weak-password': t('e_weak'),
+    'auth/user-not-found': t('e_no_user'),
+    'auth/wrong-password': t('e_wrong_pass'),
+    'auth/invalid-credential': t('e_inv_cred'),
+    'auth/too-many-requests': t('e_too_many'),
+    'auth/missing-email': t('e_missing_email')
+  };
+  return m[code] || t('e_generic');
+}
+
+function doSignup() {
+  var name = document.getElementById('su-name').value.trim();
+  var email = document.getElementById('su-email').value.trim();
+  var pass = document.getElementById('su-pass').value;
+  var pass2 = document.getElementById('su-pass2').value;
+  var errEl = document.getElementById('signup-err');
+  errEl.textContent = '';
+
+  if (!name) { errEl.textContent = t('err_name'); return; }
+  if (!email) { errEl.textContent = t('err_email'); return; }
+  if (pass.length < 6) { errEl.textContent = t('err_pass6'); return; }
+  if (pass !== pass2) { errEl.textContent = t('err_pass_match'); return; }
+
+  var btn = document.getElementById('signup-btn');
+  btn.disabled = true; btn.innerHTML = '<span class="spin sm"></span> ' + t('registering');
+
+  auth.createUserWithEmailAndPassword(email, pass).then(function(cred) {
+    return cred.user.updateProfile({displayName: name}).then(function() {
+      return cred.user.sendEmailVerification();
+    });
+  }).then(function() {
+    btn.disabled = false; btn.textContent = t('signup_submit');
+    toast(t('signup_success'));
+    hideLogin();
+  }).catch(function(err) {
+    btn.disabled = false; btn.textContent = t('signup_submit');
+    errEl.textContent = fbErr(err.code);
+  });
+}
+
+function doLogin() {
+  var email = document.getElementById('login-email').value.trim();
+  var pass = document.getElementById('login-pass').value;
+  var errEl = document.getElementById('login-err');
+  errEl.textContent = '';
+
+  if (!email || !pass) { errEl.textContent = t('err_email_pass'); return; }
+
+  var btn = document.getElementById('login-btn');
+  btn.disabled = true; btn.innerHTML = '<span class="spin sm"></span> ' + t('logging_in');
+
+  auth.signInWithEmailAndPassword(email, pass).then(function(cred) {
+    btn.disabled = false; btn.textContent = t('login_submit');
+    toast(t('welcome') + (cred.user.displayName || cred.user.email) + '! 👋');
+    hideLogin();
+  }).catch(function(err) {
+    btn.disabled = false; btn.textContent = t('login_submit');
+    errEl.textContent = fbErr(err.code);
+  });
+}
+
+function doForgotPassword() {
+  var email = document.getElementById('login-email').value.trim();
+  var errEl = document.getElementById('login-err');
+  if (!email) { errEl.textContent = t('err_email_only'); return; }
+  auth.sendPasswordResetEmail(email).then(function() {
+    toast(t('reset_sent'));
+  }).catch(function(err) {
+    errEl.textContent = fbErr(err.code);
+  });
+}
+
+function resendVerification() {
+  if (auth.currentUser) {
+    auth.currentUser.sendEmailVerification().then(function() {
+      toast(t('e_resend'));
+    }).catch(function() {
+      toast(t('e_resend_fail'));
+    });
+  }
+}
+
+// ==================== FIRESTORE SYNC ====================
+var currentUserId = null;
+var currentUserPhoto = null;
+var userPoints = 0;
+var userPurchases = {};
+var userAdminVerified = false;
+var adminGiftTargetUid = null;
+var adminGiftTargetName = '';
+var reportContext = null;
+var reportType = null;
+var notifUnreadCount = 0;
+var SHOP_ITEMS = {
+  noAds:    { cost: 50000, key:'noAds' },
+  fireName: { cost: 25000, key:'fireName' },
+  fireBg:   { cost: 25000, key:'fireBg' },
+  glitterId:{ cost: 20000, key:'glitterId' }
+};
+// ⚠️ EDIT THIS with your real bank / QPay info:
+var DONATION_INFO = {
+  bankName: 'ХХБ (TDB)',
+  accountNumber: '320004000404287623',
+  accountHolder: 'Munkhtulga Bilguunsaikhan'
+};
+
+function formatUserId(n) {
+  return String(n).padStart(7, '0');
+}
+
+function countryFlag(code) {
+  if (!code || code.length !== 2) return '🌐';
+  return code.toUpperCase().replace(/./g, function(c){ return String.fromCodePoint(c.charCodeAt(0) + 127397); });
+}
+
+function fetchCountry() {
+  return fetch('https://ipapi.co/json/').then(function(r){return r.json();}).then(function(d){
+    return { country: d.country_name || '', code: d.country_code || '' };
+  }).catch(function(){ return { country: '', code: '' }; });
+}
+
+function handlePhotoUpload(input) {
+  var file = input.files && input.files[0];
+  if (!file || !currentUser) return;
+  if (!file.type.match(/^image\//)) { toast(t('photo_err_type')); return; }
+  if (file.size > 5*1024*1024) { toast(t('photo_err_size')); return; }
+
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var img = new Image();
+    img.onload = function() {
+      var size = 200;
+      var canvas = document.createElement('canvas');
+      canvas.width = size; canvas.height = size;
+      var ctx = canvas.getContext('2d');
+      var s = Math.min(img.width, img.height);
+      var sx = (img.width - s) / 2, sy = (img.height - s) / 2;
+      ctx.drawImage(img, sx, sy, s, s, 0, 0, size, size);
+      var dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+      currentUserPhoto = dataUrl;
+      updateNavUser();
+      renderProfile();
+      db.collection('users').doc(currentUser.uid).set({ photoURL: dataUrl }, { merge: true })
+        .then(function(){ toast(t('photo_updated')); })
+        .catch(function(err){ console.error('photo save',err); toast(t('e_generic')); });
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function assignUserId(user, ref) {
+  if (user.email === ADMIN_EMAIL) {
+    currentUserId = 0;
+    ref.set({ userId: 0 }, { merge: true });
+    db.collection('meta').doc('userIdMap').set({ '0000000': user.uid }, { merge: true });
+    updateNavUser();
+    if (document.getElementById('profile-page').classList.contains('on')) renderProfile();
+    return;
+  }
+  var counterRef = db.collection('meta').doc('counters');
+  db.runTransaction(function(tx) {
+    return tx.get(counterRef).then(function(cdoc) {
+      var next = (cdoc.exists && cdoc.data().nextUserId) ? cdoc.data().nextUserId : 1;
+      tx.set(counterRef, { nextUserId: next + 1 }, { merge: true });
+      tx.set(ref, { userId: next }, { merge: true });
+      return next;
+    });
+  }).then(function(id) {
+    currentUserId = id;
+    var mapField = {}; mapField[formatUserId(id)] = user.uid;
+    db.collection('meta').doc('userIdMap').set(mapField, { merge: true });
+    if (document.getElementById('profile-page').classList.contains('on')) renderProfile();
+  }).catch(function(err){ console.error('assignUserId', err); });
+}
+
+function checkReferralReward(referrerUserId, ref) {
+  db.collection('meta').doc('userIdMap').get().then(function(mdoc){
+    var map = mdoc.exists ? mdoc.data() : {};
+    var referrerUid = map[referrerUserId];
+    if (!referrerUid || referrerUid === currentUser.uid) { ref.set({referralRewarded:true},{merge:true}); return; }
+    db.collection('users').doc(referrerUid).set({ points: firebase.firestore.FieldValue.increment(10) }, { merge: true })
+      .then(function(){
+        ref.set({referralRewarded:true},{merge:true});
+        db.collection('notifications').add({ uid: referrerUid, type:'referral', data:{}, read:false, createdAt:new Date().toISOString() }).catch(function(){});
+      })
+      .catch(function(err){ console.error('referral reward',err); });
+  });
+}
+
+function loadUserData(user) {
+  var ref = db.collection('users').doc(user.uid);
+  ref.get().then(function(doc) {
+    if (doc.exists) {
+      var data = doc.data();
+      if (data.banned === true) {
+        toast(t('banned_msg'));
+        auth.signOut();
+        return;
+      }
+      wl = data.watchlist || wl || [];
+      watchStats = data.watchStats || {};
+      watchHistory = data.watchedAnime || watchHistory || [];
+      localStorage.setItem('as_wl', JSON.stringify(wl));
+      localStorage.setItem('as_stats', JSON.stringify(watchStats));
+      localStorage.setItem('as_history', JSON.stringify(watchHistory));
+      currentUserPhoto = data.photoURL || null;
+      userPoints = data.points || 0;
+      userPurchases = data.purchases || {};
+      userAdminVerified = data.adminVerified === true;
+      if (data.points === undefined) { ref.set({ points: 0, purchases: {} }, { merge: true }); }
+      loadNotifUnreadCount();
+      updateNavUser();
+      renderHistoryRow();
+      renderRecommendations();
+      ref.set({ lastActive: new Date().toISOString(), emailVerified: user.emailVerified === true }, { merge: true });
+      if (user.email === ADMIN_EMAIL) {
+        currentUserId = 0;
+        if (data.userId !== 0) ref.set({ userId: 0 }, { merge: true });
+        if (document.getElementById('profile-page').classList.contains('on')) renderProfile();
+      } else if (data.userId !== undefined && data.userId !== null) {
+        currentUserId = data.userId;
+        if (document.getElementById('profile-page').classList.contains('on')) renderProfile();
+      } else {
+        assignUserId(user, ref);
+      }
+      if (!data.country) {
+        fetchCountry().then(function(c){ if (c.country) ref.set({ country: c.country, countryCode: c.code }, { merge: true }); });
+      }
+      if (user.emailVerified && data.referredBy && !data.referralRewarded) {
+        checkReferralReward(data.referredBy, ref);
+      }
+    } else {
+      var pendingRef = localStorage.getItem('as_pending_ref');
+      fetchCountry().then(function(c){
+        var newData = {
+          name: user.displayName || '',
+          email: user.email || '',
+          joined: new Date().toISOString(),
+          lastActive: new Date().toISOString(),
+          watchlist: wl,
+          watchStats: watchStats,
+          watchedAnime: watchHistory,
+          country: c.country || '',
+          countryCode: c.code || '',
+          points: 0,
+          purchases: {},
+          referralRewarded: false
+        };
+        if (pendingRef) { newData.referredBy = pendingRef; localStorage.removeItem('as_pending_ref'); }
+        ref.set(newData).then(function(){ assignUserId(user, ref); });
+      });
+    }
+  }).catch(function(err) { console.error('loadUserData', err); });
+}
+
+function saveUserData() {
+  if (!currentUser) return;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(function() {
+    db.collection('users').doc(currentUser.uid).set({
+      name: currentUser.displayName || '',
+      email: currentUser.email || '',
+      watchlist: wl,
+      watchStats: watchStats,
+      watchedAnime: watchHistory,
+      points: userPoints,
+      lastActive: new Date().toISOString()
+    }, { merge: true }).then(function(){ updateLeaderboardEntry(); }).catch(function(err){ console.error('saveUserData', err); });
+  }, 800);
+}
+
+function startWatchSession(anime, ep) {
+  endWatchSession();
+  sessionStart = Date.now();
+  sessionAnime = { id: anime.id, title: anime.title, epNum: ep.num };
+}
+
+function endWatchSession() {
+  if (!sessionStart || !sessionAnime) return;
+  var elapsed = Math.round((Date.now() - sessionStart) / 1000);
+  if (elapsed > 2) {
+    var key = sessionAnime.id;
+    var prevTotalSec = 0;
+    Object.keys(watchStats).forEach(function(k){ prevTotalSec += watchStats[k].totalSec || 0; });
+    if (!watchStats[key]) watchStats[key] = { title: sessionAnime.title, totalSec: 0, episodes: [], last: null };
+    watchStats[key].title = sessionAnime.title;
+    watchStats[key].totalSec += elapsed;
+    if (watchStats[key].episodes.indexOf(sessionAnime.epNum) === -1) watchStats[key].episodes.push(sessionAnime.epNum);
+    watchStats[key].last = new Date().toISOString();
+    localStorage.setItem('as_stats', JSON.stringify(watchStats));
+    var newTotalSec = prevTotalSec + elapsed;
+    var earnedPts = Math.floor(newTotalSec/60) - Math.floor(prevTotalSec/60);
+    if (earnedPts > 0 && currentUser) {
+      userPoints += earnedPts;
+      if (document.getElementById('profile-page').classList.contains('on')) renderProfile();
+    }
+    saveUserData();
+  }
+  sessionStart = null;
+  sessionAnime = null;
+}
+
+function updateNavUser() {
+  var nr = document.getElementById('nav-r');
+  var fansBtn = '<button class="notif-btn" onclick="openTopFans()">🏆</button>';
+  var notifBtn = '<button class="notif-btn" onclick="openNotifications()">🔔<span class="notif-badge" style="display:none;">0</span></button>';
+  var shopBtn = '<button class="shop-btn" onclick="openShop()"><span class="shop-emoji">🛍️</span><span class="shop-label">'+t('shop_label')+'</span></button>';
+  var langBtn = '<button class="lang-btn" onclick="toggleLang()" id="lang-btn">'+(lang==='mn'?'MN':'EN')+'</button>';
+  if (currentUser) {
+    var initials = (currentUser.displayName || currentUser.email || '?').charAt(0).toUpperCase();
+    var avatarHTML = currentUserPhoto
+      ? '<img class="nav-avatar" src="'+currentUserPhoto+'" onclick="goPage(\'profile\')">'
+      : '<div class="nav-avatar-ph" onclick="goPage(\'profile\')">'+initials+'</div>';
+    nr.innerHTML = fansBtn + notifBtn + shopBtn + langBtn + avatarHTML;
+  } else {
+    nr.innerHTML = fansBtn + notifBtn + shopBtn + langBtn + '<button class="nav-btn" onclick="showLogin()" data-i18n="login_btn">'+t('login_btn')+'</button>';
+  }
+  updateNotifBadge();
+}
+
+function logout() {
+  auth.signOut().then(function() {
+    goPage('home');
+    toast(t('logged_out'));
+  });
+}
+
+function showLogin() { document.getElementById('login-ov').classList.add('on'); }
+function hideLogin() { document.getElementById('login-ov').classList.remove('on'); }
+
+function toggleAvatarZoom() {
+  if (!currentUserPhoto) return;
+  var ov = document.getElementById('avatar-zoom-ov');
+  if (ov.classList.contains('on')) { closeAvatarZoom(); return; }
+  document.getElementById('avatar-zoom-img').src = currentUserPhoto;
+  ov.classList.add('on');
+}
+function closeAvatarZoom() {
+  document.getElementById('avatar-zoom-ov').classList.remove('on');
+}
+
+// ==================== NOTIFICATIONS ====================
+function updateNotifBadge() {
+  document.querySelectorAll('.notif-badge').forEach(function(b){
+    if (notifUnreadCount > 0) { b.style.display='flex'; b.textContent = notifUnreadCount>9?'9+':notifUnreadCount; }
+    else { b.style.display='none'; }
+  });
+}
+
+function loadNotifUnreadCount() {
+  if (!currentUser) { notifUnreadCount = 0; updateNotifBadge(); return; }
+  db.collection('notifications').where('uid','==',currentUser.uid).get().then(function(snap){
+    var count = 0;
+    snap.forEach(function(doc){ if (doc.data().read !== true) count++; });
+    notifUnreadCount = count;
+    updateNotifBadge();
+  }).catch(function(){});
+}
+
+function notifMessage(n) {
+  var d = n.data || {};
+  if (n.type === 'report_resolved') {
+    var typeLabels = {1:t('report_type1'),2:t('report_type2'),3:t('report_type3'),4:t('report_type4')};
+    return t('notif_report_resolved').replace('{type}', typeLabels[d.reportType]||'?');
+  }
+  if (n.type === 'gift') {
+    var itemLabels = {noAds:t('item_noads'), fireName:t('item_firename'), fireBg:t('item_firebg'), glitterId:t('item_glitterid')};
+    return t('notif_gift').replace('{item}', itemLabels[d.itemKey]||'?');
+  }
+  if (n.type === 'referral') return t('notif_referral');
+  if (n.type === 'announcement') return '📢 ' + escapeHtml(d.text || '');
+  if (n.type === 'donation_approved') return t('notif_donation_approved').replace('{amount}', d.amountUsd).replace('{pts}', d.points);
+  return '';
+}
+
+function openNotifications() {
+  if (!currentUser) { toast(t('shop_login_required')); return; }
+  document.getElementById('notif-ov').classList.add('on');
+  renderNotifications();
+}
+function closeNotifications(){ document.getElementById('notif-ov').classList.remove('on'); }
+function closeNotifOut(e){ if(e.target.id==='notif-ov') closeNotifications(); }
+
+function renderNotifications() {
+  var c = document.getElementById('notif-content');
+  var locale = lang==='en' ? 'en-US' : 'mn-MN';
+  c.innerHTML = '<div style="font-size:14px;font-weight:700;text-align:center;margin-bottom:14px;">'+t('notif_title')+'</div><div class="spin-wrap"><div class="spin"></div></div>';
+  db.collection('notifications').where('uid','==',currentUser.uid).get().then(function(snap){
+    var notifs = [];
+    snap.forEach(function(doc){ var d = doc.data(); d.id = doc.id; notifs.push(d); });
+    notifs.sort(function(a,b){ return new Date(b.createdAt) - new Date(a.createdAt); });
+    var html = '<div style="font-size:14px;font-weight:700;text-align:center;margin-bottom:14px;">'+t('notif_title')+'</div>';
+    if (notifs.length === 0) {
+      html += '<div class="admin-empty-small">'+t('notif_empty')+'</div>';
+    } else {
+      html += notifs.map(function(n){
+        return '<div class="notif-item'+(n.read!==true?' unread':'')+'">'+notifMessage(n)+'<div class="notif-time">'+new Date(n.createdAt).toLocaleString(locale)+'</div></div>';
+      }).join('');
+    }
+    c.innerHTML = html;
+    var unread = notifs.filter(function(n){ return n.read !== true; });
+    if (unread.length > 0) {
+      var batch = db.batch();
+      unread.forEach(function(n){ batch.update(db.collection('notifications').doc(n.id), { read: true }); });
+      batch.commit().then(function(){ notifUnreadCount = 0; updateNotifBadge(); }).catch(function(){});
+    }
+  }).catch(function(err){ c.innerHTML = '<div style="font-size:14px;font-weight:700;text-align:center;margin-bottom:14px;">'+t('notif_title')+'</div><div class="admin-empty-small">'+err.message+'</div>'; });
+}
+
+// ==================== REPORT ====================
+function openReport(animeId, animeTitle) {
+  reportContext = animeId ? { animeId: animeId, animeTitle: animeTitle } : null;
+  reportType = null;
+  document.getElementById('report-ov').classList.add('on');
+  renderReportContent();
+}
+function closeReport(){ document.getElementById('report-ov').classList.remove('on'); }
+function closeReportOut(e){ if(e.target.id==='report-ov') closeReport(); }
+
+function selectReportType(n){ reportType = n; renderReportContent(); }
+
+function renderReportContent() {
+  var c = document.getElementById('report-content');
+  if (!currentUser) {
+    c.innerHTML = '<div style="text-align:center;padding:10px 0 4px;">'+
+      '<div style="font-size:14px;color:var(--text2);margin-bottom:16px;">'+t('shop_login_required')+'</div>'+
+      '<button class="auth-submit" style="width:auto;padding:11px 26px;" onclick="closeReport();showLogin();">'+t('login_signup_btn')+'</button>'+
+    '</div>';
+    return;
+  }
+  var html = '<div style="font-size:14px;font-weight:700;text-align:center;margin-bottom:6px;">'+t('report_title')+'</div>';
+  if (reportContext) html += '<div style="font-size:11px;color:var(--text2);text-align:center;margin-bottom:14px;">🎬 '+reportContext.animeTitle+'</div>';
+  else html += '<div style="margin-bottom:6px;"></div>';
+
+  var types = [
+    {n:1, label:t('report_type1')},
+    {n:2, label:t('report_type2')},
+    {n:3, label:t('report_type3')},
+    {n:4, label:t('report_type4')}
+  ];
+  types.forEach(function(ty){
+    html += '<div class="shop-item report-opt'+(reportType===ty.n?' sel':'')+'" onclick="selectReportType('+ty.n+')">'+
+      '<div class="shop-item-info"><div class="shop-item-name">'+ty.label+'</div></div>'+
+      (reportType===ty.n?'<span style="color:var(--accent);font-weight:800;">✓</span>':'')+
+    '</div>';
+  });
+  if (reportType === 4) {
+    html += '<textarea class="report-textarea" id="report-text" placeholder="'+t('report_other_ph')+'"></textarea>';
+  }
+  html += '<button class="shop-buy-btn" style="width:100%;" onclick="submitReport()">'+t('report_submit')+'</button>';
+  c.innerHTML = html;
+}
+
+function submitReport() {
+  if (!reportType) { toast(t('report_pick_type')); return; }
+  var text = '';
+  if (reportType === 4) {
+    text = (document.getElementById('report-text').value || '').trim();
+    if (!text) { toast(t('report_pick_type')); return; }
+  }
+  var data = {
+    uid: currentUser.uid,
+    userName: currentUser.displayName || currentUser.email || '',
+    userEmail: currentUser.email || '',
+    type: reportType,
+    text: text,
+    animeId: reportContext ? reportContext.animeId : null,
+    animeTitle: reportContext ? reportContext.animeTitle : null,
+    status: 'open',
+    createdAt: new Date().toISOString()
+  };
+  db.collection('reports').add(data).then(function(){
+    toast(t('report_sent'));
+    closeReport();
+    if (document.getElementById('profile-page').classList.contains('on')) renderMyReports();
+  }).catch(function(err){ toast('Алдаа: '+err.message); });
+}
+
+function renderMyReports() {
+  var el = document.getElementById('my-reports-list');
+  if (!el || !currentUser) return;
+  var locale = lang==='en' ? 'en-US' : 'mn-MN';
+  db.collection('reports').where('uid','==',currentUser.uid).get().then(function(snap){
+    var reports = [];
+    snap.forEach(function(doc){ reports.push(doc.data()); });
+    reports.sort(function(a,b){ return new Date(b.createdAt) - new Date(a.createdAt); });
+    if (reports.length === 0) { el.innerHTML = '<div class="admin-empty-small">'+t('no_reports')+'</div>'; return; }
+    var typeLabels = {1:t('report_type1'),2:t('report_type2'),3:t('report_type3'),4:t('report_type4')};
+    el.innerHTML = reports.map(function(r){
+      var statusCls = r.status==='resolved' ? 'resolved' : 'open';
+      var statusLabel = r.status==='resolved' ? t('report_status_resolved') : t('report_status_open');
+      return '<div class="report-mini-item"><div class="rmi-top"><span>'+(typeLabels[r.type]||'?')+'</span><span class="report-status '+statusCls+'">'+statusLabel+'</span></div>'+
+        (r.animeTitle ? '<div class="rmi-meta">🎬 '+escapeHtml(r.animeTitle)+'</div>' : '')+
+        (r.text ? '<div style="font-size:11px;">'+escapeHtml(r.text)+'</div>' : '')+
+        '<div class="rmi-meta" style="margin-top:4px;">'+new Date(r.createdAt).toLocaleString(locale)+'</div></div>';
+    }).join('');
+  }).catch(function(err){ el.innerHTML = '<div class="admin-empty-small">'+err.message+'</div>'; });
+}
+
+// ==================== COMMENTS ====================
+function openComments() {
+  if (!curAnime) return;
+  document.getElementById('comments-drawer').classList.add('on');
+  loadComments(curAnime.id);
+}
+function closeComments(){ document.getElementById('comments-drawer').classList.remove('on'); }
+
+function loadComments(animeId) {
+  var listEl = document.getElementById('comments-list');
+  listEl.innerHTML = '<div class="spin-wrap"><div class="spin"></div></div>';
+  var locale = lang==='en' ? 'en-US' : 'mn-MN';
+  db.collection('comments').where('animeId','==',animeId).get().then(function(snap){
+    var comments = [];
+    snap.forEach(function(doc){ var d = doc.data(); d.id = doc.id; comments.push(d); });
+    comments.sort(function(a,b){ return new Date(b.createdAt) - new Date(a.createdAt); });
+    if (comments.length === 0) { listEl.innerHTML = '<div class="admin-empty-small">'+t('no_comments')+'</div>'; return; }
+    var isAdmin = currentUser && currentUser.email === ADMIN_EMAIL;
+    listEl.innerHTML = comments.map(function(c){
+      var canDel = currentUser && (currentUser.uid === c.uid || isAdmin);
+      return '<div class="comment-item"><div class="ci-top"><div class="comment-user">'+
+        (c.userPhoto ? '<img src="'+escapeHtml(c.userPhoto)+'" style="width:22px;height:22px;border-radius:50%;object-fit:cover;">' : '👤')+
+        ' <span>'+escapeHtml(c.userName||'?')+'</span></div>'+
+        (canDel ? '<button class="comment-del" onclick="deleteComment(\''+c.id+'\')">'+t('delete_comment')+'</button>' : '')+
+        '</div><div class="comment-text">'+escapeHtml(c.text)+'</div><div class="comment-time">'+new Date(c.createdAt).toLocaleString(locale)+'</div></div>';
+    }).join('');
+  }).catch(function(err){ listEl.innerHTML = '<div class="admin-empty-small">'+err.message+'</div>'; });
+}
+
+function postComment() {
+  if (!curAnime) return;
+  if (!currentUser) { toast(t('comment_login_required')); return; }
+  var inp = document.getElementById('comment-input');
+  var text = (inp.value || '').trim();
+  if (!text) return;
+  var data = {
+    animeId: curAnime.id,
+    animeTitle: curAnime.title,
+    uid: currentUser.uid,
+    userName: currentUser.displayName || currentUser.email || '',
+    userPhoto: currentUserPhoto || null,
+    text: text.slice(0,500),
+    createdAt: new Date().toISOString()
+  };
+  db.collection('comments').add(data).then(function(){
+    inp.value = '';
+    loadComments(curAnime.id);
+  }).catch(function(err){ toast('Алдаа: '+err.message); });
+}
+
+function deleteComment(id) {
+  if (!confirm(t('confirm_delete_comment'))) return;
+  db.collection('comments').doc(id).delete().then(function(){
+    if (curAnime) loadComments(curAnime.id);
+  }).catch(function(err){ toast('Алдаа: '+err.message); });
+}
+
+// ==================== DONATE ====================
+function renderDonate() {
+  var el = document.getElementById('donate-content');
+  var header = '<div class="admin-header" style="justify-content:center;position:relative;"><button class="admin-back" style="position:absolute;left:22px;" onclick="goPage(\'home\')">'+t('back_profile')+'</button><div class="at">'+t('donate_title')+'</div></div>';
+  if (!currentUser) {
+    el.innerHTML = header+'<div style="padding:20px;text-align:center;">'+
+      '<div style="font-size:14px;color:var(--text2);margin-bottom:16px;">'+t('shop_login_required')+'</div>'+
+      '<button class="auth-submit" style="width:auto;padding:11px 26px;" onclick="showLogin();">'+t('login_signup_btn')+'</button>'+
+    '</div>';
+    return;
+  }
+  var html = '<div style="padding:20px;max-width:480px;margin:0 auto;">';
+  html += '<div style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:18px;text-align:center;">'+t('donate_desc')+'</div>';
+  html += '<div class="profile-section">';
+  html += '<div class="profile-section-title">'+t('donate_info_title')+'</div>';
+  html += '<div style="font-size:13px;line-height:2;">🏦 '+DONATION_INFO.bankName+'<br>💳 '+DONATION_INFO.accountNumber+'<br>👤 '+DONATION_INFO.accountHolder+'</div>';
+  html += '</div>';
+  html += '<div class="profile-section">';
+  html += '<div class="profile-section-title">'+t('donate_amount_label')+'</div>';
+  html += '<input type="number" id="donate-amount" min="0.5" step="0.5" placeholder="'+t('donate_amount_ph')+'" style="width:100%;background:var(--glass2);border:1px solid var(--border2);border-radius:10px;padding:10px 12px;color:var(--text);font-size:13px;font-family:inherit;margin-bottom:10px;">';
+  html += '<textarea class="report-textarea" id="donate-note" placeholder="'+t('donate_note_ph')+'"></textarea>';
+  html += '<button class="shop-buy-btn" style="width:100%;" onclick="submitDonation()">'+t('donate_submit')+'</button>';
+  html += '</div>';
+  html += '<div class="profile-section">';
+  html += '<div class="profile-section-title">'+t('my_donations')+'</div>';
+  html += '<div id="my-donations-list" class="report-mini-list"><div class="admin-empty-small">'+t('no_donations')+'</div></div>';
+  html += '</div>';
+  html += '</div>';
+  el.innerHTML = header + html;
+  renderMyDonations();
+}
+
+function submitDonation() {
+  if (!currentUser) return;
+  var amount = parseFloat(document.getElementById('donate-amount').value);
+  if (!amount || amount <= 0) { toast(t('donate_invalid')); return; }
+  var note = (document.getElementById('donate-note').value || '').trim();
+  db.collection('donations').add({
+    uid: currentUser.uid,
+    userName: currentUser.displayName || currentUser.email || '',
+    userEmail: currentUser.email || '',
+    amountUsd: amount,
+    note: note,
+    status: 'pending',
+    createdAt: new Date().toISOString()
+  }).then(function(){
+    toast(t('donate_sent'));
+    document.getElementById('donate-amount').value = '';
+    document.getElementById('donate-note').value = '';
+    renderMyDonations();
+  }).catch(function(err){ toast('Алдаа: '+err.message); });
+}
+
+function renderMyDonations() {
+  var el = document.getElementById('my-donations-list');
+  if (!el || !currentUser) return;
+  var locale = lang==='en' ? 'en-US' : 'mn-MN';
+  db.collection('donations').where('uid','==',currentUser.uid).get().then(function(snap){
+    var list = [];
+    snap.forEach(function(doc){ list.push(doc.data()); });
+    list.sort(function(a,b){ return new Date(b.createdAt) - new Date(a.createdAt); });
+    if (list.length === 0) { el.innerHTML = '<div class="admin-empty-small">'+t('no_donations')+'</div>'; return; }
+    el.innerHTML = list.map(function(d){
+      var statusCls = d.status==='approved' ? 'resolved' : 'open';
+      var statusLabel = d.status==='approved' ? t('donation_status_approved') : t('donation_status_pending');
+      return '<div class="report-mini-item"><div class="rmi-top"><span>$'+d.amountUsd+'</span><span class="report-status '+statusCls+'">'+statusLabel+'</span></div>'+
+        (d.note ? '<div style="font-size:11px;">'+escapeHtml(d.note)+'</div>' : '')+
+        '<div class="rmi-meta" style="margin-top:4px;">'+new Date(d.createdAt).toLocaleString(locale)+'</div></div>';
+    }).join('');
+  }).catch(function(err){ el.innerHTML = '<div class="admin-empty-small">'+err.message+'</div>'; });
+}
+
+function adminToggleBan(uid, currentlyBanned) {
+  var msg = currentlyBanned ? t('confirm_unban') : t('confirm_ban');
+  if (!confirm(msg)) return;
+  db.collection('users').doc(uid).set({ banned: !currentlyBanned }, { merge: true })
+    .then(function(){ renderAdmin(); })
+    .catch(function(err){ console.error('adminToggleBan', err); toast('Алдаа: '+err.message); });
+}
+
+function adminVerifyUser(uid) {
+  db.collection('users').doc(uid).set({ adminVerified: true }, { merge: true })
+    .then(function(){ toast(t('purchase_success')); renderAdmin(); })
+    .catch(function(err){ console.error('adminVerifyUser', err); toast('Алдаа: '+err.message); });
+}
+
+function openAdminGiftShop(uid, name) {
+  adminGiftTargetUid = uid;
+  adminGiftTargetName = name;
+  document.getElementById('shop-ov').classList.add('on');
+  renderShopContent();
+}
+
+function giftShopItem(key) {
+  var uid = adminGiftTargetUid;
+  if (!uid) return;
+  function notifyGift() {
+    db.collection('notifications').add({ uid: uid, type:'gift', data:{itemKey:key}, read:false, createdAt:new Date().toISOString() }).catch(function(){});
+  }
+  if (key === 'noAds') {
+    db.collection('users').doc(uid).get().then(function(doc){
+      var pur = (doc.exists && doc.data().purchases) || {};
+      var now = Date.now();
+      var base = (pur.noAdsUntil && pur.noAdsUntil > now) ? pur.noAdsUntil : now;
+      var upd = {}; upd['purchases.noAdsUntil'] = base + 30*24*60*60*1000;
+      db.collection('users').doc(uid).set(upd, { merge: true })
+        .then(function(){ toast(t('gift_sent')); notifyGift(); })
+        .catch(function(err){ console.error('giftShopItem', err); toast('Алдаа: '+err.message); });
+    }).catch(function(err){ console.error('giftShopItem get', err); toast('Алдаа: '+err.message); });
+  } else {
+    var upd = {}; upd['purchases.'+key] = true;
+    db.collection('users').doc(uid).set(upd, { merge: true })
+      .then(function(){ toast(t('gift_sent')); notifyGift(); })
+      .catch(function(err){ console.error('giftShopItem', err); toast('Алдаа: '+err.message); });
+  }
+}
+
+// ==================== SHOP ====================
+function openShop(){ adminGiftTargetUid = null; document.getElementById('shop-ov').classList.add('on'); renderShopContent(); }
+function closeShop(){ document.getElementById('shop-ov').classList.remove('on'); adminGiftTargetUid = null; }
+function closeShopOut(e){ if(e.target.id==='shop-ov') closeShop(); }
+
+function renderShopContent() {
+  var c = document.getElementById('shop-content');
+  if (adminGiftTargetUid) {
+    var html = '<div style="font-size:14px;font-weight:700;margin-bottom:4px;text-align:center;">'+t('admin_gift_title')+'</div>'+
+      '<div style="font-size:12px;color:var(--text2);text-align:center;margin-bottom:6px;">'+adminGiftTargetName+'</div>'+
+      '<div style="font-size:11px;color:var(--text2);text-align:center;margin-bottom:18px;">'+t('gift_desc')+'</div>';
+    var gItems = [
+      {key:'noAds', name:t('item_noads')},
+      {key:'fireName', name:t('item_firename')},
+      {key:'fireBg', name:t('item_firebg')},
+      {key:'glitterId', name:t('item_glitterid')}
+    ];
+    gItems.forEach(function(it){
+      html += '<div class="shop-item"><div class="shop-item-info"><div class="shop-item-name">'+it.name+'</div></div>'+
+        '<button class="shop-buy-btn" onclick="giftShopItem(\''+it.key+'\')">'+t('gift_btn')+'</button></div>';
+    });
+    c.innerHTML = html;
+    return;
+  }
+  if (!currentUser) {
+    c.innerHTML = '<div style="text-align:center;padding:10px 0 4px;">'+
+      '<div style="font-size:14px;color:var(--text2);margin-bottom:16px;">'+t('shop_login_required')+'</div>'+
+      '<button class="auth-submit" style="width:auto;padding:11px 26px;" onclick="closeShop();showLogin();">'+t('login_signup_btn')+'</button>'+
+    '</div>';
+    return;
+  }
+  var html = '<div class="shop-points">'+userPoints.toLocaleString()+'</div>'+
+    '<div style="text-align:center;font-size:11px;color:var(--text2);margin-bottom:18px;">'+t('your_points')+'</div>';
+
+  var items = [
+    {key:'noAds', name:t('item_noads')},
+    {key:'fireName', name:t('item_firename')},
+    {key:'fireBg', name:t('item_firebg')},
+    {key:'glitterId', name:t('item_glitterid')}
+  ];
+  items.forEach(function(it){
+    var cost = SHOP_ITEMS[it.key].cost;
+    var owned = it.key==='noAds' ? (userPurchases.noAdsUntil && userPurchases.noAdsUntil > Date.now()) : !!userPurchases[it.key];
+    var btnHTML;
+    if (owned && it.key!=='noAds') {
+      btnHTML = '<button class="shop-buy-btn owned" disabled>'+t('owned')+'</button>';
+    } else {
+      btnHTML = '<button class="shop-buy-btn" onclick="buyItem(\''+it.key+'\')" '+(userPoints<cost?'disabled':'')+'>'+t('buy_btn')+'</button>';
+    }
+    var extra = (it.key==='noAds' && owned) ? '<div style="font-size:10px;color:#22c55e;margin-top:3px;">✓ '+new Date(userPurchases.noAdsUntil).toLocaleDateString(lang==='en'?'en-US':'mn-MN')+'-'+t('active_until')+'</div>' : '';
+    html += '<div class="shop-item"><div class="shop-item-info"><div class="shop-item-name">'+it.name+'</div><div class="shop-item-cost">'+cost.toLocaleString()+' pts</div>'+extra+'</div>'+btnHTML+'</div>';
+  });
+
+  html += '<div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--border);">'+
+    '<div style="font-size:12px;font-weight:700;margin-bottom:8px;">'+t('how_to_earn')+'</div>'+
+    '<div style="font-size:11px;color:var(--text2);line-height:1.9;">'+t('earn_watch')+'<br>'+t('earn_invite')+'</div></div>';
+
+  c.innerHTML = html;
+}
+
+function buyItem(key) {
+  if (!currentUser) return;
+  var item = SHOP_ITEMS[key];
+  if (!item) return;
+  if (key !== 'noAds' && userPurchases[key]) return;
+  if (userPoints < item.cost) { toast(t('not_enough_points')); return; }
+  userPoints -= item.cost;
+  if (key === 'noAds') {
+    var now = Date.now();
+    var base = (userPurchases.noAdsUntil && userPurchases.noAdsUntil > now) ? userPurchases.noAdsUntil : now;
+    userPurchases.noAdsUntil = base + 30*24*60*60*1000;
+  } else {
+    userPurchases[key] = true;
+  }
+  db.collection('users').doc(currentUser.uid).set({ points: userPoints, purchases: userPurchases }, { merge: true });
+  toast(t('purchase_success'));
+  renderShopContent();
+  if (document.getElementById('profile-page').classList.contains('on')) renderProfile();
+  updateNavUser();
+}
+
+function copyRefLink() {
+  var inp = document.getElementById('ref-link-input');
+  if (!inp) return;
+  inp.select();
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(inp.value).then(function(){ toast(t('link_copied')); }).catch(function(){
+      document.execCommand('copy'); toast(t('link_copied'));
+    });
+  } else {
+    document.execCommand('copy'); toast(t('link_copied'));
+  }
+}
+
+auth.onAuthStateChanged(function(user) {
+  currentUser = user;
+  if (!user) { currentUserId = null; currentUserPhoto = null; userPoints = 0; userPurchases = {}; userAdminVerified = false; notifUnreadCount = 0; }
+  updateNavUser();
+  if (user) loadUserData(user);
+  if (document.getElementById('profile-page').classList.contains('on')) renderProfile();
+});
+
+// ==================== PROFILE ====================
+function renderProfile() {
+  var c = document.getElementById('profile-content');
+  if (!currentUser) {
+    c.innerHTML = '<div class="profile-login-prompt">'+
+      '<div style="font-size:42px;margin-bottom:12px;">👤</div>'+
+      '<div style="font-size:14px;color:var(--text2);font-weight:600;">'+t('profile_login_prompt')+'</div>'+
+      '<button onclick="showLogin()">'+t('login_signup_btn')+'</button>'+
+    '</div>';
+    return;
+  }
+  var initials = (currentUser.displayName || currentUser.email || '?').charAt(0).toUpperCase();
+  var verified = currentUser.emailVerified || userAdminVerified;
+  var locale = lang==='en' ? 'en-US' : 'mn-MN';
+  var joined = currentUser.metadata && currentUser.metadata.creationTime ? new Date(currentUser.metadata.creationTime).toLocaleDateString(locale) : '?';
+
+  var avatarHTML = currentUserPhoto
+    ? '<img class="profile-avatar" src="'+currentUserPhoto+'" onclick="toggleAvatarZoom()" style="cursor:pointer;">'
+    : '<div class="profile-avatar-ph">'+initials+'</div>';
+
+  var isAdmin = currentUser.email === ADMIN_EMAIL;
+  var hasFireName = isAdmin || !!userPurchases.fireName;
+  var hasFireBg = isAdmin || !!userPurchases.fireBg;
+  var hasGlitterId = isAdmin || !!userPurchases.glitterId;
+  var nameText = escapeHtml(currentUser.displayName) || t('unnamed_user');
+  var nameDisplay = hasFireName ? '🔥 '+nameText+' 🔥' : nameText;
+  var nameClass = hasFireName ? ' fire-name' : '';
+  var idText = (currentUserId !== null && currentUserId !== undefined) ? formatUserId(currentUserId) : null;
+  var idDisplay = idText ? '  ·  🆔 '+t('your_id')+': <span'+(hasGlitterId?' class="id-glitter"':'')+'>'+idText+'</span>' : '';
+
+  var html = '<div class="profile-header'+(hasFireBg?' fire-bg':'')+'">'+
+    '<div class="avatar-wrap">'+avatarHTML+
+      '<label class="avatar-edit" for="avatar-input" title="'+t('change_photo')+'">📷</label>'+
+      '<input type="file" id="avatar-input" class="avatar-input" accept="image/*" onchange="handlePhotoUpload(this)">'+
+    '</div>'+
+    '<div class="profile-info">'+
+      '<div class="p-name'+nameClass+'">'+nameDisplay+'</div>'+
+      '<div class="p-email">'+currentUser.email+'</div>'+
+      '<div class="p-joined">📅 '+joined+t('joined')+idDisplay+'</div>'+
+      '<div class="p-badges">'+
+        '<span class="p-badge">'+t('fan_badge')+'</span>'+
+        '<span class="p-badge '+(verified?'verified':'unverified')+'">'+(verified?t('verified'):t('unverified'))+'</span>'+
+      '</div>'+
+    '</div></div>';
+
+  if (!verified) {
+    html += '<div class="verify-banner"><span>'+t('verify_msg')+'</span><button onclick="resendVerification()">'+t('resend')+'</button></div>';
+  }
+
+  html += '<div class="profile-stats">'+
+    '<div class="pstat"><div class="pstat-n">'+wl.length+'</div><div class="pstat-l">'+t('stat_wl')+'</div></div>'+
+    '<div class="pstat"><div class="pstat-n">'+watchHistory.length+'</div><div class="pstat-l">'+t('stat_watched')+'</div></div>'+
+    '<div class="pstat"><div class="pstat-n">0</div><div class="pstat-l">'+t('stat_done')+'</div></div>'+
+  '</div>';
+
+  html += '<div class="profile-section" style="text-align:center;">'+
+    '<div style="font-size:11px;color:var(--text2);margin-bottom:4px;">'+t('your_points')+'</div>'+
+    '<div style="font-size:32px;font-weight:800;font-family:\'Unbounded\',sans-serif;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;">'+userPoints.toLocaleString()+'</div>'+
+    '<button class="edit-btn" style="margin:10px auto 0;" onclick="openShop()">'+t('shop_title')+'</button>'+
+    '<button class="edit-btn" style="margin:8px auto 0;" onclick="goPage(\'donate\')">'+t('donate_btn')+'</button>'+
+  '</div>';
+
+  if (idText) {
+    var refLink = window.location.origin + window.location.pathname + '?ref=' + idText;
+    html += '<div class="profile-section">'+
+      '<div class="profile-section-title">'+t('invite_title')+'</div>'+
+      '<div style="font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.6;">'+t('invite_desc')+'</div>'+
+      '<div style="display:flex;gap:8px;">'+
+        '<input type="text" readonly value="'+refLink+'" id="ref-link-input" style="flex:1;min-width:0;background:var(--glass2);border:1px solid var(--border2);border-radius:10px;padding:9px 12px;color:var(--text);font-size:11px;font-family:inherit;">'+
+        '<button class="edit-btn" style="margin:0;white-space:nowrap;" onclick="copyRefLink()">'+t('copy_link')+'</button>'+
+      '</div></div>';
+  }
+
+  html += '<div class="profile-section">'+
+    '<div class="profile-section-title">'+t('my_reports')+'</div>'+
+    '<div id="my-reports-list" class="report-mini-list"><div class="admin-empty-small">'+t('no_reports')+'</div></div>'+
+    '<button class="edit-btn" style="margin-top:6px;" onclick="openReport(null,null)">'+t('report_btn')+'</button>'+
+  '</div>';
+
+  var savedTheme = localStorage.getItem('as_theme') || 'purple';
+  html += '<div class="profile-section">'+
+    '<div class="profile-section-title">'+t('theme_title')+'</div>'+
+    '<div class="theme-row">' + Object.keys(THEMES).map(function(name){
+      return '<div class="theme-dot'+(name===savedTheme?' on':'')+'" data-theme="'+name+'" style="background:'+THEMES[name].grad+'" onclick="applyTheme(\''+name+'\')"></div>';
+    }).join('') + '</div>'+
+  '</div>';
+
+  html += '<div class="profile-section">'+
+    '<div class="profile-section-title">'+t('settings_title')+'</div>'+
+    (currentUser.email === ADMIN_EMAIL ? '<button class="edit-btn" onclick="goPage(\'admin\')">'+t('admin_panel')+'</button>' : '')+
+    '<button class="logout-btn" onclick="logout()">'+t('logout')+'</button>'+
+  '</div>';
+
+  html += '<div class="sec"><div class="sec-title">'+t('sec_wl')+'</div><div class="grid" id="profile-wl-grid"></div><div id="profile-wl-empty" style="display:none;text-align:center;padding:20px;color:var(--text2);font-size:12px;">'+t('profile_wl_empty')+'</div></div>';
+
+  c.innerHTML = html;
+  renderMyReports();
+
+  var pwg = document.getElementById('profile-wl-grid');
+  var pwe = document.getElementById('profile-wl-empty');
+  if (wl.length === 0) { pwe.style.display='block'; return; }
+  pwg.innerHTML='<div class="spin-wrap"><div class="spin"></div></div>';
+  gql('query($ids:[Int]){Page(page:1,perPage:50){media(id_in:$ids){'+F+'}}}',{ids:wl}).then(function(d){
+    pwg.innerHTML=d.data.Page.media.map(function(a){return makeCard(a,false);}).join('');
+  });
+}
+
+// ==================== ADMIN ====================
+function renderAdminReports() {
+  var el = document.getElementById('admin-reports');
+  if (!el) return;
+  var locale = lang==='en' ? 'en-US' : 'mn-MN';
+  el.innerHTML = '<div class="spin-wrap"><div class="spin"></div></div>';
+  db.collection('reports').get().then(function(snap){
+    var reports = [];
+    snap.forEach(function(doc){ var d=doc.data(); d.id=doc.id; reports.push(d); });
+    reports.sort(function(a,b){ return new Date(b.createdAt) - new Date(a.createdAt); });
+    if (reports.length === 0) { el.innerHTML = '<div class="admin-empty-small">'+t('no_reports')+'</div>'; return; }
+    var typeLabels = {1:t('report_type1'),2:t('report_type2'),3:t('report_type3'),4:t('report_type4')};
+    el.innerHTML = reports.map(function(r){
+      var statusCls = r.status==='resolved' ? 'resolved' : 'open';
+      var statusLabel = r.status==='resolved' ? t('report_status_resolved') : t('report_status_open');
+      return '<div class="report-mini-item"><div class="rmi-top"><span>'+(typeLabels[r.type]||'?')+'</span><span class="report-status '+statusCls+'">'+statusLabel+'</span></div>'+
+        '<div class="rmi-meta">👤 '+escapeHtml(r.userName||'?')+' · '+escapeHtml(r.userEmail||'')+'</div>'+
+        (r.animeTitle ? '<div class="rmi-meta">🎬 '+escapeHtml(r.animeTitle)+'</div>' : '')+
+        (r.text ? '<div style="font-size:11px;margin:4px 0;">'+escapeHtml(r.text)+'</div>' : '')+
+        '<div class="rmi-meta">'+new Date(r.createdAt).toLocaleString(locale)+'</div>'+
+        (r.status!=='resolved' ? '<button class="admin-action-btn" style="margin-top:8px;" onclick="adminResolveReport(\''+r.id+'\',\''+r.uid+'\','+r.type+')">'+t('report_resolve')+'</button>' : '')+
+      '</div>';
+    }).join('');
+  }).catch(function(err){ el.innerHTML = '<div class="admin-empty-small">'+err.message+'</div>'; });
+}
+
+function adminSendAnnouncement() {
+  var ta = document.getElementById('admin-announce-text');
+  var text = (ta.value || '').trim();
+  if (!text) return;
+  db.collection('users').get().then(function(snap){
+    var docs = [];
+    snap.forEach(function(doc){ docs.push(doc.id); });
+    var chunks = [];
+    for (var i=0; i<docs.length; i+=450) chunks.push(docs.slice(i,i+450));
+    var promises = chunks.map(function(chunk){
+      var batch = db.batch();
+      chunk.forEach(function(uid){
+        var ref = db.collection('notifications').doc();
+        batch.set(ref, { uid: uid, type:'announcement', data:{text:text}, read:false, createdAt:new Date().toISOString() });
+      });
+      return batch.commit();
+    });
+    Promise.all(promises).then(function(){
+      toast(t('announce_sent'));
+      ta.value = '';
+    }).catch(function(err){ toast('Алдаа: '+err.message); });
+  }).catch(function(err){ toast('Алдаа: '+err.message); });
+}
+
+function renderAdminDonations() {
+  var el = document.getElementById('admin-donations');
+  if (!el) return;
+  var locale = lang==='en' ? 'en-US' : 'mn-MN';
+  el.innerHTML = '<div class="spin-wrap"><div class="spin"></div></div>';
+  db.collection('donations').get().then(function(snap){
+    var list = [];
+    snap.forEach(function(doc){ var d=doc.data(); d.id=doc.id; list.push(d); });
+    list.sort(function(a,b){ return new Date(b.createdAt) - new Date(a.createdAt); });
+    if (list.length === 0) { el.innerHTML = '<div class="admin-empty-small">'+t('no_donations')+'</div>'; return; }
+    el.innerHTML = list.map(function(d){
+      var statusCls = d.status==='approved' ? 'resolved' : 'open';
+      var statusLabel = d.status==='approved' ? t('donation_status_approved') : t('donation_status_pending');
+      var pts = Math.round((d.amountUsd||0)*100);
+      return '<div class="report-mini-item"><div class="rmi-top"><span>$'+d.amountUsd+'</span><span class="report-status '+statusCls+'">'+statusLabel+'</span></div>'+
+        '<div class="rmi-meta">👤 '+escapeHtml(d.userName||'?')+' · '+escapeHtml(d.userEmail||'')+'</div>'+
+        (d.note ? '<div style="font-size:11px;margin:4px 0;">'+escapeHtml(d.note)+'</div>' : '')+
+        '<div class="rmi-meta">'+new Date(d.createdAt).toLocaleString(locale)+'</div>'+
+        (d.status!=='approved' ? '<button class="admin-action-btn" style="margin-top:8px;" onclick="adminApproveDonation(\''+d.id+'\',\''+d.uid+'\','+d.amountUsd+')">✓ +'+pts+' '+t('donation_approve_pts')+'</button>' : '')+
+      '</div>';
+    }).join('');
+  }).catch(function(err){ el.innerHTML = '<div class="admin-empty-small">'+err.message+'</div>'; });
+}
+
+function adminApproveDonation(id, uid, amountUsd) {
+  var pts = Math.round(amountUsd*100);
+  db.collection('donations').doc(id).set({ status:'approved' }, { merge:true })
+    .then(function(){
+      db.collection('users').doc(uid).set({ points: firebase.firestore.FieldValue.increment(pts) }, { merge: true });
+      db.collection('notifications').add({ uid: uid, type:'donation_approved', data:{amountUsd:amountUsd, points:pts}, read:false, createdAt:new Date().toISOString() }).catch(function(){});
+      renderAdminDonations();
+    })
+    .catch(function(err){ toast('Алдаа: '+err.message); });
+}
+
+function adminResolveReport(id, uid, reportType) {
+  db.collection('reports').doc(id).set({ status:'resolved' }, { merge:true })
+    .then(function(){
+      db.collection('notifications').add({ uid: uid, type:'report_resolved', data:{reportType:reportType}, read:false, createdAt:new Date().toISOString() }).catch(function(){});
+      renderAdminReports();
+    })
+    .catch(function(err){ toast('Алдаа: '+err.message); });
+}
+
+function renderAdmin() {
+  var c = document.getElementById('admin-content');
+  if (!currentUser || currentUser.email !== ADMIN_EMAIL) {
+    c.innerHTML = '<div class="profile-login-prompt">'+
+      '<div style="font-size:42px;margin-bottom:12px;">🔒</div>'+
+      '<div style="font-size:14px;color:var(--text2);font-weight:600;">'+t('admin_only')+'</div>'+
+      '<button onclick="goPage(\'home\')">'+t('back_home')+'</button>'+
+    '</div>';
+    return;
+  }
+  c.innerHTML = '<div class="admin-header"><div class="at">'+t('admin_dashboard')+'</div><button class="admin-back" onclick="goPage(\'profile\')">'+t('back_profile')+'</button></div>'+
+    '<div class="admin-summary" id="admin-summary"><div class="spin-wrap"><div class="spin"></div></div></div>'+
+    '<div class="admin-users" id="admin-countries" style="padding-top:0;"></div>'+
+    '<div class="admin-section-label" style="margin:18px 0 10px;font-size:14px;">'+t('admin_announce_title')+'</div>'+
+    '<div class="admin-users"><textarea class="report-textarea" id="admin-announce-text" placeholder="'+t('admin_announce_ph')+'" style="margin-bottom:10px;"></textarea>'+
+    '<button class="shop-buy-btn" onclick="adminSendAnnouncement()">'+t('admin_announce_send')+'</button></div>'+
+    '<div class="admin-section-label" style="margin:18px 0 10px;font-size:14px;">'+t('admin_reports')+'</div>'+
+    '<div class="admin-users" id="admin-reports"></div>'+
+    '<div class="admin-section-label" style="margin:18px 0 10px;font-size:14px;">'+t('admin_donations')+'</div>'+
+    '<div class="admin-users" id="admin-donations"></div>'+
+    '<div class="admin-section-label" style="margin:18px 0 10px;font-size:14px;">'+t('total_users')+'</div>'+
+    '<div class="admin-users" id="admin-users"></div>';
+
+  var locale = lang==='en' ? 'en-US' : 'mn-MN';
+  renderAdminReports();
+  renderAdminDonations();
+
+  db.collection('users').get().then(function(snap) {
+    var users = [];
+    var allWlIds = [];
+    snap.forEach(function(doc) {
+      var d = doc.data();
+      d.uid = doc.id;
+      users.push(d);
+      (d.watchlist||[]).forEach(function(id){ if(allWlIds.indexOf(id)===-1) allWlIds.push(id); });
+    });
+
+    var totalUsers = users.length;
+    var totalWatchSec = 0;
+    var countryCounts = {};
+    var countryCodes = {};
+    users.forEach(function(u){
+      Object.keys(u.watchStats||{}).forEach(function(k){ totalWatchSec += (u.watchStats[k].totalSec||0); });
+      var cn = u.country || '—';
+      countryCounts[cn] = (countryCounts[cn]||0) + 1;
+      if (u.countryCode) countryCodes[cn] = u.countryCode;
+    });
+
+    document.getElementById('admin-summary').innerHTML =
+      '<div class="admin-pill"><div class="admin-pill-n">'+totalUsers+'</div><div class="admin-pill-l">'+t('total_users')+'</div></div>'+
+      '<div class="admin-pill"><div class="admin-pill-n">'+Math.round(totalWatchSec/60)+'</div><div class="admin-pill-l">'+t('total_minutes')+'</div></div>';
+
+    var countryHTML = '<div class="admin-section-label">'+t('country_breakdown')+'</div><div class="admin-tag-row">' +
+      Object.keys(countryCounts).sort(function(a,b){ return countryCounts[b]-countryCounts[a]; }).map(function(cn){
+        var pct = Math.round(countryCounts[cn]/totalUsers*100);
+        return '<span class="admin-tag">'+countryFlag(countryCodes[cn])+' '+cn+': '+pct+'%</span>';
+      }).join('') + '</div>';
+    document.getElementById('admin-countries').innerHTML = totalUsers>0 ? countryHTML : '';
+
+    var titleMap = {};
+    function renderUsers() {
+      var html = '';
+      users.sort(function(a,b){ return new Date(b.lastActive||0) - new Date(a.lastActive||0); });
+      users.forEach(function(u){
+        var initials = (u.name || u.email || '?').charAt(0).toUpperCase();
+        var joined = u.joined ? new Date(u.joined).toLocaleDateString(locale) : '?';
+        var lastActive = u.lastActive ? new Date(u.lastActive).toLocaleString(locale) : '?';
+        var isMe = u.email === ADMIN_EMAIL;
+        var isVerified = u.emailVerified === true || u.adminVerified === true;
+        var safeName = (u.name||u.email||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+        html += '<div class="admin-card">'+
+          '<div class="admin-card-top">'+
+            (u.photoURL ? '<img class="admin-avatar" src="'+u.photoURL+'" style="object-fit:cover;">' : '<div class="admin-avatar">'+initials+'</div>')+
+            '<div><div class="admin-card-name">'+escapeHtml(u.name||t('unnamed_user'))+(u.userId?' <span style="color:var(--text2);font-weight:600;">#'+formatUserId(u.userId)+'</span>':'')+'</div><div class="admin-card-email">'+escapeHtml(u.email)+'</div><div class="admin-card-meta">📅 '+joined+t('joined')+' · 🕐 '+lastActive+(u.country?' · '+countryFlag(u.countryCode)+' '+escapeHtml(u.country):'')+'</div></div>'+
+            (isMe ? '<div class="admin-badge-self">'+t('you_badge')+'</div>' : (u.banned ? '<div class="admin-badge-banned">'+t('banned_badge')+'</div>' : ''))+
+          '</div>';
+
+        if (!isMe) {
+          html += '<div class="admin-actions">'+
+            '<button class="admin-action-btn'+(u.banned?'':' danger')+'" onclick="adminToggleBan(\''+u.uid+'\','+(!!u.banned)+')">'+(u.banned?t('unban_btn'):t('ban_btn'))+'</button>'+
+            (isVerified ? '<span class="admin-action-btn" style="cursor:default;opacity:.6;">'+t('already_verified')+'</span>' : '<button class="admin-action-btn" onclick="adminVerifyUser(\''+u.uid+'\')">'+t('verify_btn')+'</button>')+
+            '<button class="admin-action-btn" onclick="openAdminGiftShop(\''+u.uid+'\',\''+safeName+'\')">'+t('gift_btn')+'</button>'+
+          '</div>';
+        }
+
+        var wlIds = u.watchlist || [];
+        html += '<div class="admin-section-label">'+t('admin_wl')+' ('+wlIds.length+')</div>';
+        if (wlIds.length === 0) {
+          html += '<div class="admin-empty-small">'+t('empty')+'</div>';
+        } else {
+          html += '<div class="admin-tag-row">' + wlIds.map(function(id){ return '<span class="admin-tag">'+(titleMap[id]||('#'+id))+'</span>'; }).join('') + '</div>';
+        }
+
+        var stats = u.watchStats || {};
+        var keys = Object.keys(stats);
+        var userTotalSec = keys.reduce(function(sum,k){ return sum + (stats[k].totalSec||0); }, 0);
+        html += '<div class="admin-section-label">'+t('admin_watched')+(userTotalSec>0?' — '+t('total_time_l')+': '+Math.round(userTotalSec/60)+' '+t('min_l'):'')+'</div>';
+        if (keys.length === 0) {
+          html += '<div class="admin-empty-small">'+t('no_watched')+'</div>';
+        } else {
+          keys.forEach(function(k){
+            var s = stats[k];
+            var mins = Math.max(1, Math.round((s.totalSec||0)/60));
+            var lastW = s.last ? new Date(s.last).toLocaleDateString(locale) : '?';
+            html += '<div class="admin-watch-item"><span>'+s.title+'</span><span>⏱ '+mins+' '+t('min_l')+' · '+((s.episodes||[]).length)+' '+t('ep_abbr')+' · '+lastW+'</span></div>';
+          });
+        }
+
+        html += '</div>';
+      });
+      document.getElementById('admin-users').innerHTML = html || '<div class="admin-empty-small">'+t('no_users')+'</div>';
+    }
+
+    if (allWlIds.length > 0) {
+      gql('query($ids:[Int]){Page(page:1,perPage:50){media(id_in:$ids){id title{romaji english}}}}',{ids:allWlIds}).then(function(d){
+        d.data.Page.media.forEach(function(m){ titleMap[m.id] = m.title.english || m.title.romaji; });
+        renderUsers();
+      }).catch(function(){ renderUsers(); });
+    } else {
+      renderUsers();
+    }
+  }).catch(function(err){
+    document.getElementById('admin-users').innerHTML = '<div class="admin-empty-small">Алдаа гарлаа: '+err.message+'</div>';
+  });
+}
+var ANIME_LIST = [
+  { id:'aot', title:'Attack on Titan', score:'9.0', format:'TV', year:2013,
+    desc:'Хүмүүс аварга биетэй Титан-уудаас зугтан хэрмийн дотор амьдардаг.',
+    genres:['Экшн','Драм'],
+    episodes:[
+      {num:1, title:'Давалгаа гарч ирнэ', vid:'O1hbt4c1X9o', thumb:'https://i.ytimg.com/vi/O1hbt4c1X9o/mqdefault.jpg'},
+      {num:2, title:'Тэр өдөр', vid:'SKhyFLBNurs', thumb:'https://i.ytimg.com/vi/SKhyFLBNurs/mqdefault.jpg'},
+      {num:3, title:'Намар', vid:'MWKcW14-HQY', thumb:'https://i.ytimg.com/vi/MWKcW14-HQY/mqdefault.jpg'},
+      {num:4, title:'Цэргийн бэлтгэл', vid:'lhE4MZtKGKM', thumb:'https://i.ytimg.com/vi/lhE4MZtKGKM/mqdefault.jpg'},
+    ]},
+  { id:'slime', title:'That Time I Got Reincarnated as a Slime', score:'8.2', format:'TV', year:2018,
+    desc:'37 насны офисын ажилтан өөр ертөнцөд Слайм болон дахин төрдөг.',
+    genres:['Экшн','Фэнтэзи'],
+    episodes:[
+      {num:1, title:'Слайм болж төрөх нь', vid:'atKXtRVqVLc', thumb:'https://i.ytimg.com/vi/atKXtRVqVLc/mqdefault.jpg'},
+      {num:2, title:'Вэлдорагтай уулзах', vid:'fHpzd63NX9Y', thumb:'https://i.ytimg.com/vi/fHpzd63NX9Y/mqdefault.jpg'},
+      {num:3, title:'Гоблинүүдийн тосгон', vid:'nAeG9FSVPBA', thumb:'https://i.ytimg.com/vi/nAeG9FSVPBA/mqdefault.jpg'},
+    ]},
+  { id:'overlord', title:'Overlord', score:'8.1', format:'TV', year:2015,
+    desc:'Тоглоом дуусахад нь өөр ертөнцөд шилжсэн хамгийн хүчирхэг дүр.',
+    genres:['Экшн','Фэнтэзи'],
+    episodes:[
+      {num:1, title:'Төгсгөлийн өдөр', vid:'IGGJQwMpMaM', thumb:'https://i.ytimg.com/vi/IGGJQwMpMaM/mqdefault.jpg'},
+      {num:2, title:'Шинэ ертөнц', vid:'FJF_A3Dqxm4', thumb:'https://i.ytimg.com/vi/FJF_A3Dqxm4/mqdefault.jpg'},
+    ]},
+  { id:'spyxfamily', title:'Spy x Family', score:'8.5', format:'TV', year:2022,
+    desc:'Тагнуулч тасалдал даалгавраа биелүүлэхийн тулд хуурамч гэр бүл байгуулна.',
+    genres:['Экшн','Инээдмийн'],
+    episodes:[
+      {num:1, title:'Гэр бүл байгуулах нь', vid:'RfdGBWM_zHU', thumb:'https://i.ytimg.com/vi/RfdGBWM_zHU/mqdefault.jpg'},
+      {num:2, title:'Операц Стрикс', vid:'2OmHKfxQ_1E', thumb:'https://i.ytimg.com/vi/2OmHKfxQ_1E/mqdefault.jpg'},
+    ]},
+  { id:'vinland', title:'Vinland Saga', score:'8.8', format:'TV', year:2019,
+    desc:'Викингийн эрин үед амьдарч буй Тофиний өш хонзон, эрх чөлөөний тухай туульс.',
+    genres:['Экшн','Драм'],
+    episodes:[
+      {num:1, title:'Асхелад', vid:'FYBA_KJn1GA', thumb:'https://i.ytimg.com/vi/FYBA_KJn1GA/mqdefault.jpg'},
+      {num:2, title:'Ruthless', vid:'uN7QjHQx4qk', thumb:'https://i.ytimg.com/vi/uN7QjHQx4qk/mqdefault.jpg'},
+    ]},
+];
+
+var curAnime = null;
+var curEpIdx = 0;
+
+function renderAnimeEpGrid() {
+  var html = '';
+  ANIME_LIST.forEach(function(a) {
+    var ep = a.episodes[0];
+    html += '<div class="ep-card" onclick="openAnimePlayer(\''+a.id+'\',0)">'+
+      '<div class="ep-thumb"><img src="'+ep.thumb+'" onerror="this.style.display=\'none\'"><div class="ep-play">▶</div></div>'+
+      '<div class="ep-info">'+
+        '<div class="ep-num">'+a.format+' • '+a.year+'</div>'+
+        '<div class="ep-title2">'+a.title+'</div>'+
+        '<div class="ep-dur">⭐'+a.score+' • '+a.episodes.length+' '+t('ep_label')+'</div>'+
+      '</div></div>';
+  });
+  document.getElementById('anime-ep-grid').innerHTML = html;
+}
+
+var MN_TO_EN_GENRE = {
+  'Экшн':'Action','Адал явдал':'Adventure','Инээдмийн':'Comedy','Драм':'Drama','Фэнтэзи':'Fantasy',
+  'Аймшиг':'Horror','Нууц':'Mystery','Романс':'Romance','Шинжлэх ухаан':'Sci-Fi','Амьдрал':'Slice of Life',
+  'Спорт':'Sports','Ид шид':'Supernatural','Триллер':'Thriller'
+};
+
+function renderRecommendations() {
+  var sec = document.getElementById('rec-sec');
+  if (!sec) return;
+  var watched = (watchHistory||[]).map(function(id){ return ANIME_LIST.filter(function(a){return a.id===id;})[0]; }).filter(Boolean);
+  if (watched.length === 0) { sec.style.display='none'; return; }
+  var counts = {};
+  watched.forEach(function(a){
+    (a.genres||[]).forEach(function(g){
+      var en = MN_TO_EN_GENRE[g] || g;
+      counts[en] = (counts[en]||0) + 1;
+    });
+  });
+  var topGenres = Object.keys(counts).sort(function(a,b){return counts[b]-counts[a];});
+  if (topGenres.length === 0) { sec.style.display='none'; return; }
+  var genre = topGenres[0];
+  gql('query{Page(page:1,perPage:12){media(sort:POPULARITY_DESC,type:ANIME,isAdult:false,genre:"'+genre+'"){'+F+'}}}').then(function(d){
+    var list = (d.data && d.data.Page && d.data.Page.media) || [];
+    if (list.length === 0) { sec.style.display='none'; return; }
+    sec.style.display='block';
+    renderRow('rec-row', list, false);
+  }).catch(function(){ sec.style.display='none'; });
+}
+
+function makeLocalCard(a) {
+  var ep = a.episodes[0];
+  var stats = watchStats[a.id];
+  var resumeIdx = 0;
+  if (stats && stats.episodes && stats.episodes.length) {
+    var maxEp = Math.max.apply(null, stats.episodes);
+    var found = a.episodes.findIndex(function(e){ return e.num === maxEp; });
+    if (found !== -1) resumeIdx = found;
+  }
+  return '<div class="card" onclick="openAnimePlayer(\''+a.id+'\','+resumeIdx+')">'+
+    '<img src="'+ep.thumb+'" loading="lazy" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">'+
+    '<div class="card-ph" style="display:none;">🎬</div>'+
+    '<div class="card-body"><div class="card-title">'+a.title+'</div><div class="card-meta"><span class="cs">⭐'+a.score+'</span><span class="ct">'+(a.format||'TV')+'</span></div></div></div>';
+}
+
+function renderHistoryRow() {
+  var sec = document.getElementById('history-sec');
+  if (!sec) return;
+  var items = (watchHistory||[]).filter(function(id){ return ANIME_LIST.some(function(a){return a.id===id;}); });
+  if (items.length === 0) { sec.style.display='none'; return; }
+  items.sort(function(a,b){
+    var la = (watchStats[a] && watchStats[a].last) || '';
+    var lb = (watchStats[b] && watchStats[b].last) || '';
+    return lb.localeCompare(la);
+  });
+  sec.style.display='block';
+  document.getElementById('history-row').innerHTML = items.map(function(id){
+    var a = ANIME_LIST.filter(function(x){return x.id===id;})[0];
+    return makeLocalCard(a);
+  }).join('');
+}
+
+function openAnimePlayer(id, epIdx) {
+  var a = ANIME_LIST.filter(function(x){return x.id===id;})[0];
+  if (!a) return;
+  curAnime = a; curEpIdx = epIdx;
+  // Track history
+  if (watchHistory.indexOf(id) === -1) { watchHistory.push(id); localStorage.setItem('as_history', JSON.stringify(watchHistory)); saveUserData(); }
+  document.getElementById('player').classList.add('on');
+  setEp(epIdx);
+  renderEpBar2();
+}
+
+function setEp(idx) {
+  var ep = curAnime.episodes[idx]; curEpIdx = idx;
+  document.getElementById('player-title').textContent = curAnime.title + ' — ' + epTitle(ep.num, ep.title);
+  document.getElementById('yt-frame').src = 'https://www.youtube.com/embed/' + ep.vid + '?autoplay=1&rel=0';
+  document.getElementById('yt-watch-link').href = 'https://www.youtube.com/watch?v=' + ep.vid;
+  document.querySelectorAll('.ep-mini').forEach(function(el,i){ el.classList.toggle('on', i===idx); });
+  startWatchSession(curAnime, ep);
+}
+
+function renderEpBar2() {
+  var html = '';
+  curAnime.episodes.forEach(function(ep,i){
+    html += '<div class="ep-mini'+(i===curEpIdx?' on':'')+'" onclick="setEp('+i+')">'+
+      '<div class="ep-mini-thumb" style="position:relative;"><img src="'+ep.thumb+'" onerror="this.style.display=\'none\'"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:14px;">▶</div></div>'+
+      '<div class="ep-mini-lbl">'+epShort(ep.num)+'</div></div>';
+  });
+  document.getElementById('ep-bar').innerHTML = html;
+}
+
+function closePlayer() {
+  endWatchSession();
+  document.getElementById('player').classList.remove('on');
+  document.getElementById('yt-frame').src='';
+  closeComments();
+  renderHistoryRow();
+  renderRecommendations();
+}
+
+// ==================== AL ====================
+var F = 'id title{romaji english native} coverImage{large extraLarge} bannerImage description genres averageScore episodes status season seasonYear format trailer{id site} studios{nodes{name}}';
+var FM = 'id title{romaji english native} coverImage{large extraLarge} description genres averageScore chapters status format volumes';
+var genres = new Set();
+var mangaLoaded = false;
+var animeBrowseLoaded = false;
+var searchT = null;
+
+function gql(q, v) {
+  return fetch('https://graphql.anilist.co', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({query:q, variables:v||{}})}).then(function(r){return r.json();});
+}
+
+function loadTrending() {
+  gql('query{Page(page:1,perPage:20){media(sort:TRENDING_DESC,type:ANIME,isAdult:false){'+F+'}}}').then(function(d){
+    var list = d.data.Page.media;
+    lastTrendingList = list;
+    renderHero(list[0]);
+    renderRow('tr-row', list.slice(0,12), false);
+    list.forEach(function(a){ (a.genres||[]).forEach(function(g){genres.add(g);}); });
+    renderGenres();
+  });
+}
+function loadTop() {
+  gql('query{Page(page:1,perPage:12){media(sort:SCORE_DESC,type:ANIME,isAdult:false,minimumTagRank:60){'+F+'}}}').then(function(d){ lastTopList=d.data.Page.media; renderRow('top-row',d.data.Page.media,false); });
+}
+function loadManga() {
+  if(mangaLoaded) return; mangaLoaded=true;
+  gql('query{Page(page:1,perPage:20){media(sort:TRENDING_DESC,type:MANGA,isAdult:false,format:MANGA){'+FM+'}}}').then(function(d){ renderRow('mtr-row',d.data.Page.media,true); });
+  gql('query{Page(page:1,perPage:20){media(sort:SCORE_DESC,type:MANGA,isAdult:false,minimumTagRank:60){'+FM+'}}}').then(function(d){ renderRow('mtop-row',d.data.Page.media,true); });
+  gql('query{Page(page:1,perPage:16){media(sort:TRENDING_DESC,type:MANGA,isAdult:false,format:MANHWA){'+FM+'}}}').then(function(d){ renderRow('mhw-row',d.data.Page.media,true); });
+}
+
+var lastHero=null, lastTrendingList=null, lastTopList=null, lastAnimeBrowseList=null, lastAnimeBrowseGenre=null;
+
+function renderHero(a) {
+  if(!a) return;
+  lastHero = a;
+  var ttl=a.title.english||a.title.romaji;
+  var sc=a.averageScore?(a.averageScore/10).toFixed(1):'N/A';
+  var desc=a.description?a.description.replace(/<[^>]+>/g,'').slice(0,160)+'...':'';
+  var inWL=wl.indexOf(a.id)!==-1;
+  var img=a.coverImage.extraLarge?'<img src="'+a.coverImage.extraLarge+'" style="width:100%;height:100%;object-fit:cover;">':'<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:40px;background:linear-gradient(135deg,#1a0a2e,#2d1b4e)">🎌</div>';
+  document.getElementById('hero-c').innerHTML=
+    '<div class="hero-poster">'+img+'</div>'+
+    '<div class="hero-info">'+
+      '<div class="hbadges"><span class="hb hb1">🔥 TRENDING</span><span class="hb hb2">⭐ '+sc+'</span><span class="hb hb3">'+(a.format||'TV')+'</span></div>'+
+      '<div class="htitle">'+ttl+'</div><div class="hen">'+(a.title.native||'')+'</div>'+
+      '<div class="hdesc">'+desc+'</div>'+
+      '<div class="hmeta">'+(a.episodes?'<span class="hm">📺 '+a.episodes+' '+t('ep_short')+'</span>':'')+(a.studios&&a.studios.nodes[0]?'<span class="hm">🏢 '+a.studios.nodes[0].name+'</span>':'')+'</div>'+
+      '<div class="hbtns"><button class="btn-a pu" onclick="openModal('+a.id+')">'+t('details_btn')+'</button><button class="btn-sec" onclick="toggleWL('+a.id+',this)">'+(inWL?t('in_wl'):t('add_wl'))+'</button></div>'+
+    '</div>';
+}
+
+function makeCard(a, isManga) {
+  var ttl=a.title.english||a.title.romaji;
+  var sc=a.averageScore?'⭐'+(a.averageScore/10).toFixed(1):'';
+  var img=a.coverImage?(a.coverImage.large||a.coverImage.extraLarge):'';
+  var inWL=wl.indexOf(a.id)!==-1;
+  var fn=isManga?'openMangaModal('+a.id+')':'openModal('+a.id+')';
+  return '<div class="card'+(isManga?' mc':'')+'" onclick="'+fn+'">'+
+    (inWL?'<div class="cbadge">❤️</div>':'')+
+    (img?'<img src="'+img+'" loading="lazy" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">':'')+
+    '<div class="card-ph" style="'+(img?'display:none':'')+'">📖</div>'+
+    '<div class="card-body"><div class="card-title">'+ttl+'</div><div class="card-meta"><span class="cs">'+sc+'</span><span class="ct">'+(a.format||'?')+'</span></div></div></div>';
+}
+
+function renderRow(id,list,isManga) {
+  var el=document.getElementById(id); if(!el) return;
+  el.innerHTML=list.map(function(a){return makeCard(a,isManga);}).join('');
+}
+
+function renderGenres() {
+  var gb=document.getElementById('genre-bar');
+  gb.querySelectorAll('.gc[data-genre]').forEach(function(el){el.remove();});
+  ['Action','Adventure','Comedy','Drama','Fantasy','Horror','Mystery','Romance','Sci-Fi','Slice of Life','Sports','Supernatural','Thriller'].forEach(function(g){
+    if(genres.has(g)){var c=document.createElement('div');c.className='gc';c.dataset.genre=g;c.textContent=GT(g);c.onclick=function(){filterG(g,c);};gb.appendChild(c);}
+  });
+  renderAnimeGenreBar();
+}
+
+function renderAnimeGenreBar() {
+  var gb=document.getElementById('anime-genre-bar');
+  if(!gb) return;
+  gb.querySelectorAll('.gc[data-genre]').forEach(function(el){el.remove();});
+  ['Action','Adventure','Comedy','Drama','Fantasy','Horror','Mystery','Romance','Sci-Fi','Slice of Life','Sports','Supernatural','Thriller'].forEach(function(g){
+    if(genres.has(g)){var c=document.createElement('div');c.className='gc';c.dataset.genre=g;c.textContent=GT(g);c.onclick=function(){filterAnimeBrowse(g,c);};gb.appendChild(c);}
+  });
+}
+
+function filterAnimeBrowse(g,el) {
+  document.querySelectorAll('#anime-genre-bar .gc').forEach(function(c){c.classList.remove('on');});
+  el.classList.add('on');
+  loadAnimeBrowse(g);
+}
+
+function loadAnimeBrowse(g) {
+  lastAnimeBrowseGenre = g;
+  document.getElementById('anime-browse-grid').innerHTML = '<div class="spin-wrap"><div class="spin"></div></div>';
+  var genreFilter = g ? ',genre:"'+g+'"' : '';
+  gql('query{Page(page:1,perPage:24){media(sort:POPULARITY_DESC,type:ANIME,isAdult:false'+genreFilter+'){'+F+'}}}').then(function(d){
+    lastAnimeBrowseList = d.data.Page.media;
+    renderRow('anime-browse-grid', lastAnimeBrowseList, false);
+  });
+}
+function filterG(g,el) {
+  document.querySelectorAll('.gc').forEach(function(c){c.classList.remove('on');});
+  el.classList.add('on');
+  if(!g){loadTrending();loadTop();return;}
+  document.getElementById('tr-row').innerHTML='<div class="spin-wrap"><div class="spin"></div></div>';
+  gql('query{Page(page:1,perPage:20){media(sort:TRENDING_DESC,type:ANIME,isAdult:false,genre:"'+g+'"){'+F+'}}}').then(function(d){
+    var list=d.data.Page.media; lastTrendingList=list; if(list[0]) renderHero(list[0]); renderRow('tr-row',list,false);
+  });
+}
+
+function openModal(id) {
+  document.getElementById('modal').classList.add('on');
+  document.getElementById('modal-body').innerHTML='<div class="spin-wrap"><div class="spin"></div></div>';
+  document.getElementById('mb').innerHTML='<div class="mbbg" id="mbbg"></div><div class="mbov"></div><button class="modal-x" onclick="closeModal()">✕</button>';
+  document.getElementById('mbbg').style.background='linear-gradient(135deg,#1a0a2e,#2d1b4e)';
+  gql('query($id:Int){Media(id:$id,type:ANIME){'+F+'}}',{id:id}).then(function(d){
+    var a=d.data && d.data.Media;
+    if(!a){ document.getElementById('modal-body').innerHTML='<div class="r-info">'+t('retry')+'</div>'; return; }
+    var ttl=a.title.english||a.title.romaji;
+    var sc=a.averageScore?(a.averageScore/10).toFixed(1):'N/A';
+    var desc=a.description?a.description.replace(/<[^>]+>/g,''):t('no_desc');
+    var inWL=wl.indexOf(a.id)!==-1;
+    if(a.bannerImage){document.getElementById('mb').insertAdjacentHTML('afterbegin','<img src="'+a.bannerImage+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">');}
+    var gHTML=(a.genres||[]).slice(0,5).map(function(g){return '<span class="mg">'+GT(g)+'</span>';}).join('');
+    var trHTML=(a.trailer&&a.trailer.site==='youtube')?'<div class="trailer-w"><iframe src="https://www.youtube.com/embed/'+a.trailer.id+'?rel=0" allowfullscreen></iframe></div>':'';
+    document.getElementById('modal-body').innerHTML=
+      '<div class="mt">'+ttl+'</div><div class="me2">'+(a.title.native||a.title.romaji)+'</div>'+
+      '<div class="mstats"><div class="ms">'+t('rating')+': <span>⭐ '+sc+'</span></div><div class="ms">'+t('episodes_l')+': <span>'+(a.episodes||'?')+'</span></div><div class="ms">'+t('year_l')+': <span>'+(a.seasonYear||'?')+'</span></div></div>'+
+      '<div class="mgenres">'+gHTML+'</div><div class="mdesc">'+desc+'</div>'+
+      '<div class="mactions"><button class="btn-a pu" style="flex:1;" onclick="closeModal();goPage(\'anime\')">'+t('watch_anime_btn')+'</button><button class="btn-sec" onclick="toggleWL('+a.id+',this)">'+(inWL?t('in_wl'):t('add_wl'))+'</button></div>'+trHTML;
+  }).catch(function(err){ console.error('openModal',err); document.getElementById('modal-body').innerHTML='<div class="r-info">'+t('retry')+'</div>'; });
+}
+
+function openMangaModal(id) {
+  document.getElementById('modal').classList.add('on');
+  document.getElementById('modal-body').innerHTML='<div class="spin-wrap"><div class="spin"></div></div>';
+  document.getElementById('mb').innerHTML='<div class="mbbg" id="mbbg"></div><div class="mbov"></div><button class="modal-x" onclick="closeModal()">✕</button>';
+  document.getElementById('mbbg').style.background='linear-gradient(135deg,#2e0a0a,#4e1b1b)';
+  gql('query($id:Int){Media(id:$id,type:MANGA){'+FM+'}}',{id:id}).then(function(d){
+    var a=d.data && d.data.Media;
+    if(!a){ document.getElementById('modal-body').innerHTML='<div class="r-info">'+t('retry')+'</div>'; return; }
+    var ttl=a.title.english||a.title.romaji;
+    var sc=a.averageScore?(a.averageScore/10).toFixed(1):'N/A';
+    var desc=a.description?a.description.replace(/<[^>]+>/g,''):t('no_desc');
+    var inWL=wl.indexOf(a.id)!==-1;
+    if(a.coverImage&&a.coverImage.extraLarge){document.getElementById('mb').insertAdjacentHTML('afterbegin','<img src="'+a.coverImage.extraLarge+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.35;">');}
+    var gHTML=(a.genres||[]).slice(0,5).map(function(g){return '<span class="mg r">'+GT(g)+'</span>';}).join('');
+    document.getElementById('modal-body').innerHTML=
+      '<div class="mt">'+ttl+'</div><div class="me2">'+(a.title.native||a.title.romaji)+'</div>'+
+      '<div class="mstats"><div class="ms">'+t('rating')+': <span>⭐ '+sc+'</span></div><div class="ms">'+t('episodes_l')+': <span>'+(a.chapters||'?')+'</span></div></div>'+
+      '<div class="mgenres">'+gHTML+'</div><div class="mdesc">'+desc+'</div>'+
+      '<div class="mactions"><button class="btn-a ru" style="flex:1;">'+t('read_btn')+'</button><button class="btn-sec" onclick="toggleWL('+a.id+',this)">'+(inWL?t('in_wl'):t('add_wl'))+'</button></div>';
+  }).catch(function(err){ console.error('openMangaModal',err); document.getElementById('modal-body').innerHTML='<div class="r-info">'+t('retry')+'</div>'; });
+}
+
+function closeModal(){document.getElementById('modal').classList.remove('on');}
+function closeModalOut(e){if(e.target.id==='modal') closeModal();}
+
+// ==================== ONE PIECE ====================
+var OP_ID='a1c7c817-4e59-43b7-9365-09675a149a6f';
+var MX='https://api.mangadex.org';
+var chapters=[]; var curCh=0;
+
+function openOP(){document.getElementById('op-modal').classList.add('on');if(chapters.length===0) loadOPCh(); else renderChList();}
+function closeOP(){document.getElementById('op-modal').classList.remove('on');}
+function closeOPOut(e){if(e.target.id==='op-modal') closeOP();}
+function addOPToWL(btn){ toast('One Piece '+t('op_added')); btn.textContent=t('in_wl'); }
+
+function loadOPCh() {
+  fetch(MX+'/chapter?manga='+OP_ID+'&translatedLanguage[]=en&order[chapter]=asc&limit=96&contentRating[]=safe&contentRating[]=suggestive')
+    .then(function(r){return r.json();}).then(function(d){
+      if(!d.data) return;
+      chapters=d.data;
+      var sel=document.getElementById('r-sel'); sel.innerHTML='';
+      chapters.forEach(function(ch,i){var o=document.createElement('option');o.value=i;o.textContent=t('op_chapter_l')+' '+(ch.attributes.chapter||i+1);sel.appendChild(o);});
+      renderChList();
+    }).catch(function(){document.getElementById('op-ch').innerHTML='<div style="font-size:11px;color:var(--text2);padding:8px;">'+t('conn_error')+'</div>';});
+}
+
+function renderChList() {
+  var html='';
+  chapters.slice(0,50).forEach(function(ch,i){
+    var n=ch.attributes.chapter||(i+1);
+    var t2=ch.attributes.title?' — '+ch.attributes.title:'';
+    html+='<div class="ch-item" onclick="startReader('+i+')"><div class="ch-n">'+t('op_chapter_l')+' '+n+t2+'</div><div class="ch-r">'+t('read_btn')+'</div></div>';
+  });
+  if(chapters.length>50) html+='<div style="font-size:10px;color:var(--text2);padding:6px 0;text-align:center;">'+t('total_chapters').replace('{n}',chapters.length)+'</div>';
+  document.getElementById('op-ch').innerHTML=html;
+}
+
+function startReader(idx){closeOP();curCh=idx;document.getElementById('reader').classList.add('on');loadCh(idx);}
+function loadCh(idx) {
+  idx=parseInt(idx); curCh=idx;
+  var ch=chapters[idx]; if(!ch) return;
+  document.getElementById('r-sel').value=idx;
+  document.getElementById('r-title').textContent='One Piece — '+t('op_chapter_l')+' '+(ch.attributes.chapter||idx+1);
+  document.getElementById('r-body').innerHTML='<div class="r-info"><div class="spin" style="margin:0 auto 10px;"></div>'+t('loading')+'</div>';
+  fetch(MX+'/at-home/server/'+ch.id)
+    .then(function(r){return r.json();}).then(function(d){
+      var html='';
+      (d.chapter.data||[]).forEach(function(p){html+='<img class="r-page" src="'+d.baseUrl+'/data/'+d.chapter.hash+'/'+p+'" loading="lazy">';});
+      document.getElementById('r-body').innerHTML=html||'<div class="r-info">'+t('no_pages')+'</div>';
+      document.getElementById('r-body').scrollTop=0;
+    }).catch(function(){document.getElementById('r-body').innerHTML='<div class="r-info">'+t('retry')+'</div>';});
+}
+function prevCh(){if(curCh>0){curCh--;document.getElementById('r-sel').value=curCh;loadCh(curCh);}else toast(t('first_ch'));}
+function nextCh(){if(curCh<chapters.length-1){curCh++;document.getElementById('r-sel').value=curCh;loadCh(curCh);}else toast(t('last_ch'));}
+function closeReader(){document.getElementById('reader').classList.remove('on');}
+
+// ==================== WL ====================
+function toggleWL(id,btn) {
+  var i=wl.indexOf(id);
+  if(i===-1){wl.push(id);toast(t('added_wl'));}
+  else{wl.splice(i,1);toast(t('removed_wl'));}
+  localStorage.setItem('as_wl',JSON.stringify(wl));
+  saveUserData();
+  if(btn) btn.textContent=wl.indexOf(id)!==-1?t('in_wl'):t('add_wl');
+}
+function loadWL() {
+  var g=document.getElementById('wl-grid'),e=document.getElementById('wl-empty');
+  if(wl.length===0){g.innerHTML='';e.style.display='block';return;}
+  e.style.display='none';
+  g.innerHTML='<div class="spin-wrap"><div class="spin"></div></div>';
+  gql('query($ids:[Int]){Page(page:1,perPage:50){media(id_in:$ids){'+F+'}}}',{ids:wl}).then(function(d){
+    g.innerHTML=d.data.Page.media.map(function(a){return makeCard(a,false);}).join('');
+  });
+}
+
+// ==================== SEARCH ====================
+function goHome() {
+  document.getElementById('si').value = '';
+  document.getElementById('adv-genre').value = '';
+  document.getElementById('adv-format').value = '';
+  document.getElementById('adv-year').value = '';
+  document.getElementById('search-sec').style.display = 'none';
+  document.getElementById('home-main').style.display = 'block';
+  document.getElementById('adv-panel').classList.remove('on');
+  document.getElementById('adv-toggle-btn').classList.remove('on');
+  goPage('home');
+}
+
+function toggleAdvSearch() {
+  var panel = document.getElementById('adv-panel');
+  var btn = document.getElementById('adv-toggle-btn');
+  panel.classList.toggle('on');
+  btn.classList.toggle('on', panel.classList.contains('on'));
+}
+
+function hasActiveFilters() {
+  return !!(document.getElementById('adv-genre').value || document.getElementById('adv-format').value || document.getElementById('adv-year').value);
+}
+
+function doSearch(val) {
+  clearTimeout(searchT);
+  var ss=document.getElementById('search-sec');
+  var hm=document.getElementById('home-main');
+  var hasText = val && val.trim();
+  if(!hasText && !hasActiveFilters()){ss.style.display='none';hm.style.display='block';return;}
+  if (document.getElementById('home-page').style.display === 'none') {
+    goPage('home');
+  }
+  ss.style.display='block';
+  hm.style.display='none';
+  document.getElementById('search-grid').innerHTML='<div class="spin-wrap"><div class="spin"></div></div>';
+  searchT=setTimeout(function(){
+    var genre = document.getElementById('adv-genre').value;
+    var format = document.getElementById('adv-format').value;
+    var year = document.getElementById('adv-year').value;
+    var sort = document.getElementById('adv-sort').value || 'POPULARITY_DESC';
+    var mArgs = ['isAdult:false','sort:'+sort];
+    if (hasText) mArgs.push('search:$s');
+    if (genre) mArgs.push('genre:"'+genre+'"');
+    if (format) mArgs.push('format:'+format);
+    if (year) mArgs.push('seasonYear:'+year);
+    var query = hasText
+      ? 'query($s:String){Page(page:1,perPage:24){media('+mArgs.join(',')+'){'+F+'}}}'
+      : 'query{Page(page:1,perPage:24){media('+mArgs.join(',')+'){'+F+'}}}';
+    gql(query, hasText?{s:val}:{}).then(function(d){
+      var list = (d.data && d.data.Page && d.data.Page.media) || [];
+      if (list.length === 0) {
+        document.getElementById('search-grid').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--text2);font-size:13px;">'+t('no_results')+'</div>';
+      } else {
+        document.getElementById('search-grid').innerHTML=list.map(function(a){return makeCard(a,false);}).join('');
+      }
+    }).catch(function(){
+      document.getElementById('search-grid').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--text2);font-size:13px;">'+t('retry')+'</div>';
+    });
+  },500);
+}
+
+// ==================== NAV ====================
+function goPage(p) {
+  document.getElementById('home-page').style.display=p==='home'?'block':'none';
+  document.querySelectorAll('.page').forEach(function(el){el.classList.remove('on');});
+  document.querySelectorAll('.nl').forEach(function(el){el.classList.remove('on');});
+  if(p!=='home') document.getElementById(p+'-page').classList.add('on');
+  var pages=['home','anime','manga','wl'];
+  var links=document.querySelectorAll('.nl');
+  var i=pages.indexOf(p);
+  if(i!==-1&&links[i]) links[i].classList.add('on');
+  if(p==='home') { renderHistoryRow(); renderRecommendations(); }
+  if(p==='wl') loadWL();
+  if(p==='manga') loadManga();
+  if(p==='anime'){ renderAnimeEpGrid(); if(!animeBrowseLoaded){ animeBrowseLoaded=true; renderAnimeGenreBar(); loadAnimeBrowse(null); } }
+  if(p==='profile') renderProfile();
+  if(p==='admin') renderAdmin();
+  if(p==='fans') renderTopFans();
+  if(p==='donate') renderDonate();
+}
+
+// ==================== UTILS ====================
+function escapeHtml(s){ if(s==null) return ''; return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function toast(msg){var t=document.getElementById('toast-el');t.textContent=msg;t.classList.add('on');setTimeout(function(){t.classList.remove('on');},2500);}
+function GT(g){ if(lang==='en') return g; return {Action:'Экшн',Adventure:'Адал явдал',Comedy:'Инээдмийн',Drama:'Драм',Fantasy:'Фэнтэзи',Horror:'Аймшиг',Mystery:'Нууц',Romance:'Романс','Sci-Fi':'Шинжлэх ухаан','Slice of Life':'Амьдрал',Sports:'Спорт',Supernatural:'Ид шид',Thriller:'Триллер'}[g]||g; }
+
+// ==================== INIT ====================
+(function(){
+  var params = new URLSearchParams(window.location.search);
+  var ref = params.get('ref');
+  if (ref) localStorage.setItem('as_pending_ref', ref);
+})();
+applyTheme(localStorage.getItem('as_theme') || 'purple');
+if (lang !== 'mn') applyLanguage();
+enableRowScroll();
+renderHistoryRow();
+renderRecommendations();
+renderTopFans();
+loadTrending();
+loadTop();
+// Анх ачаалахад auth төлөв тогтсоны дараа нэвтрээгүй бол login харуулах
+var authResolved = false;
+auth.onAuthStateChanged(function(){
+  if (!authResolved) {
+    authResolved = true;
+    if (!currentUser) setTimeout(function(){ showLogin(); }, 600);
+  }
+});
+</script>
+</body>
+</html>
