@@ -957,6 +957,17 @@ var STRINGS = {
     my_donations:'📋 Миний хандивууд', no_donations:'Хандив байхгүй',
     donation_status_pending:'🟡 Хүлээгдэж буй', donation_status_approved:'✓ Баталгаажсан',
     admin_donations:'💝 Хандивууд', donation_approve_pts:'оноо',
+    admin_add_anime:'➕ Аниме нэмэх',
+    aa_title:'Нэр (АниList-тай яг адил байх ёстой)', aa_title_ph:'Жишээ: Attack on Titan',
+    aa_year:'Он', aa_score:'Үнэлгээ (жишээ: 8.5)', aa_format:'Төрөл',
+    aa_genres:'Genre (таслалаар, англиар: Action, Drama)', aa_genres_ph:'Action, Drama, Fantasy',
+    aa_desc:'Тайлбар', aa_desc_ph:'Анимэгийн тухай товч тайлбар...',
+    aa_ep_title:'Ангийн нэр', aa_ep_title_ph:'Анги 1', aa_ep_link:'YouTube линк/ID',
+    aa_add_ep:'+ Анги нэмэх', aa_remove_ep:'✕',
+    aa_save:'Хадгалах', aa_saved:'Аниме нэмэгдлээ! 🎉', aa_fill_required:'Нэр болон дор хаяж 1 ангийн линк хэрэгтэй',
+    aa_my_anime:'Нэмсэн анимэнүүд', aa_no_custom:'Одоогоор нэмсэн анимэ байхгүй',
+    aa_delete_confirm:'Энэ анимэг устгах уу?',
+    shop_preview:'Жишээ:',
     notif_donation_approved:'Таны ${amount} хандив баталгаажиж, +{pts} оноо нэмэгдлээ! 🎉',
     footer:'AniGem © 2026 · AniList · MangaDex · Muse Asia'
   },
@@ -1054,6 +1065,17 @@ var STRINGS = {
     my_donations:'📋 My Donations', no_donations:'No donations yet',
     donation_status_pending:'🟡 Pending', donation_status_approved:'✓ Approved',
     admin_donations:'💝 Donations', donation_approve_pts:'points',
+    admin_add_anime:'➕ Add Anime',
+    aa_title:'Title (must match AniList exactly)', aa_title_ph:'e.g. Attack on Titan',
+    aa_year:'Year', aa_score:'Score (e.g. 8.5)', aa_format:'Format',
+    aa_genres:'Genres (comma separated, English)', aa_genres_ph:'Action, Drama, Fantasy',
+    aa_desc:'Description', aa_desc_ph:'Short description of the anime...',
+    aa_ep_title:'Episode title', aa_ep_title_ph:'Episode 1', aa_ep_link:'YouTube link/ID',
+    aa_add_ep:'+ Add episode', aa_remove_ep:'✕',
+    aa_save:'Save', aa_saved:'Anime added! 🎉', aa_fill_required:'Title and at least 1 episode link required',
+    aa_my_anime:'Added anime', aa_no_custom:'No custom anime yet',
+    aa_delete_confirm:'Delete this anime?',
+    shop_preview:'Preview:',
     notif_donation_approved:'Your ${amount} donation was approved — +{pts} points! 🎉',
     footer:'AniGem © 2026 · AniList · MangaDex · Muse Asia'
   }
@@ -1915,6 +1937,11 @@ function renderShopContent() {
     {key:'fireBg', name:t('item_firebg')},
     {key:'glitterId', name:t('item_glitterid')}
   ];
+  var PREVIEWS = {
+    fireName: '<div class="fire-name" style="font-size:16px;text-align:center;">'+(currentUser.displayName ? escapeHtml(currentUser.displayName) : 'Таны нэр')+'</div>',
+    fireBg: '<div class="fire-bg" style="background:linear-gradient(135deg,#1c1033,#0d1430);border-radius:10px;padding:14px;text-align:center;font-size:11px;color:var(--text2);">Profile background</div>',
+    glitterId: '<div class="id-glitter" style="font-size:14px;text-align:center;">🆔 '+(currentUserId!=null?formatUserId(currentUserId):'00123')+'</div>'
+  };
   items.forEach(function(it){
     var cost = SHOP_ITEMS[it.key].cost;
     var owned = it.key==='noAds' ? (userPurchases.noAdsUntil && userPurchases.noAdsUntil > Date.now()) : !!userPurchases[it.key];
@@ -1925,7 +1952,11 @@ function renderShopContent() {
       btnHTML = '<button class="shop-buy-btn" onclick="buyItem(\''+it.key+'\')" '+(userPoints<cost?'disabled':'')+'>'+t('buy_btn')+'</button>';
     }
     var extra = (it.key==='noAds' && owned) ? '<div style="font-size:10px;color:#22c55e;margin-top:3px;">✓ '+new Date(userPurchases.noAdsUntil).toLocaleDateString(lang==='en'?'en-US':'mn-MN')+'-'+t('active_until')+'</div>' : '';
-    html += '<div class="shop-item"><div class="shop-item-info"><div class="shop-item-name">'+it.name+'</div><div class="shop-item-cost">'+cost.toLocaleString()+' pts</div>'+extra+'</div>'+btnHTML+'</div>';
+    var preview = PREVIEWS[it.key] ? '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">'+
+        '<div style="font-size:10px;color:var(--text2);margin-bottom:6px;">'+t('shop_preview')+'</div>'+PREVIEWS[it.key]+'</div>' : '';
+    html += '<div class="shop-item" style="flex-direction:column;align-items:stretch;">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">'+
+      '<div class="shop-item-info"><div class="shop-item-name">'+it.name+'</div><div class="shop-item-cost">'+cost.toLocaleString()+' pts</div>'+extra+'</div>'+btnHTML+'</div>'+preview+'</div>';
   });
 
   html += '<div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--border);">'+
@@ -2169,6 +2200,85 @@ function adminApproveDonation(id, uid, amountUsd) {
     .catch(function(err){ toast('Алдаа: '+err.message); });
 }
 
+// ==================== ADMIN: ADD ANIME ====================
+var aaEpCount = 0;
+function extractYoutubeId(input) {
+  if (!input) return '';
+  input = input.trim();
+  var m = input.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  if (m) return m[1];
+  if (/^[A-Za-z0-9_-]{11}$/.test(input)) return input;
+  return '';
+}
+function aaEpRowHtml(idx) {
+  return '<div class="aa-ep-row" id="aa-ep-row-'+idx+'" style="margin-bottom:10px;padding:12px;display:flex;gap:8px;align-items:flex-start;background:var(--glass2);border:1px solid var(--border2);border-radius:10px;">'+
+    '<div style="flex:1;">'+
+      '<input type="text" class="aa-ep-title" placeholder="'+t('aa_ep_title_ph')+' '+(idx+1)+'" style="width:100%;background:var(--glass2);border:1px solid var(--border2);border-radius:10px;padding:9px 11px;color:var(--text);font-size:12px;font-family:inherit;margin-bottom:6px;">'+
+      '<input type="text" class="aa-ep-link" placeholder="'+t('aa_ep_link')+'" style="width:100%;background:var(--glass2);border:1px solid var(--border2);border-radius:10px;padding:9px 11px;color:var(--text);font-size:12px;font-family:inherit;">'+
+    '</div>'+
+    '<button class="comment-del" onclick="aaRemoveEpisodeRow('+idx+')">'+t('aa_remove_ep')+'</button>'+
+  '</div>';
+}
+function aaAddEpisodeRow() {
+  var idx = aaEpCount++;
+  document.getElementById('aa-episodes').insertAdjacentHTML('beforeend', aaEpRowHtml(idx));
+}
+function aaRemoveEpisodeRow(idx) {
+  var el = document.getElementById('aa-ep-row-'+idx);
+  if (el) el.remove();
+}
+function aaResetForm() {
+  var t1=document.getElementById('aa-title'), y=document.getElementById('aa-year'), s=document.getElementById('aa-score'),
+      f=document.getElementById('aa-format'), g=document.getElementById('aa-genres'), d=document.getElementById('aa-desc'),
+      ep=document.getElementById('aa-episodes');
+  if (!t1) return;
+  t1.value=''; y.value=''; s.value=''; f.value='TV'; g.value=''; d.value='';
+  ep.innerHTML='';
+  aaEpCount = 0;
+  aaAddEpisodeRow();
+}
+function adminSubmitAnime() {
+  var title = document.getElementById('aa-title').value.trim();
+  var year = parseInt(document.getElementById('aa-year').value) || new Date().getFullYear();
+  var score = document.getElementById('aa-score').value.trim() || '—';
+  var format = document.getElementById('aa-format').value;
+  var genres = document.getElementById('aa-genres').value.split(',').map(function(g){return g.trim();}).filter(Boolean);
+  var desc = document.getElementById('aa-desc').value.trim();
+  var episodes = [];
+  document.querySelectorAll('#aa-episodes .aa-ep-row').forEach(function(row, i){
+    var epTitle = row.querySelector('.aa-ep-title').value.trim();
+    var epLink = row.querySelector('.aa-ep-link').value.trim();
+    var vid = extractYoutubeId(epLink);
+    if (!vid) return;
+    episodes.push({ num: episodes.length+1, title: epTitle || ('Анги '+(episodes.length+1)), vid: vid, thumb: 'https://i.ytimg.com/vi/'+vid+'/mqdefault.jpg' });
+  });
+  if (!title || episodes.length === 0) { toast(t('aa_fill_required')); return; }
+  var customId = 'custom_' + Date.now();
+  db.collection('customAnime').add({
+    id: customId, title: title, year: year, score: score, format: format,
+    genres: genres, desc: desc, episodes: episodes, createdAt: new Date().toISOString()
+  }).then(function(){
+    toast(t('aa_saved'));
+    aaResetForm();
+    loadCustomAnime();
+  }).catch(function(err){ toast('Алдаа: '+err.message); });
+}
+function renderAdminCustomAnime() {
+  var el = document.getElementById('admin-custom-anime');
+  if (!el) return;
+  if (CUSTOM_ANIME_LIST.length === 0) { el.innerHTML = '<div class="admin-empty-small">'+t('aa_no_custom')+'</div>'; return; }
+  el.innerHTML = CUSTOM_ANIME_LIST.map(function(a){
+    return '<div class="report-mini-item"><div class="rmi-top"><span>'+escapeHtml(a.title)+' ('+a.year+')</span></div>'+
+      '<div class="rmi-meta">⭐'+escapeHtml(a.score)+' · '+a.episodes.length+' '+t('ep_label')+'</div>'+
+      '<button class="comment-del" style="margin-top:6px;" onclick="adminDeleteCustomAnime(\''+a.docId+'\')">'+t('delete_comment')+'</button>'+
+    '</div>';
+  }).join('');
+}
+function adminDeleteCustomAnime(docId) {
+  if (!confirm(t('aa_delete_confirm'))) return;
+  db.collection('customAnime').doc(docId).delete().then(function(){ loadCustomAnime(); }).catch(function(err){ toast('Алдаа: '+err.message); });
+}
+
 function adminResolveReport(id, uid, reportType) {
   db.collection('reports').doc(id).set({ status:'resolved' }, { merge:true })
     .then(function(){
@@ -2194,6 +2304,25 @@ function renderAdmin() {
     '<div class="admin-section-label" style="margin:18px 0 10px;font-size:14px;">'+t('admin_announce_title')+'</div>'+
     '<div class="admin-users"><textarea class="report-textarea" id="admin-announce-text" placeholder="'+t('admin_announce_ph')+'" style="margin-bottom:10px;"></textarea>'+
     '<button class="shop-buy-btn" onclick="adminSendAnnouncement()">'+t('admin_announce_send')+'</button></div>'+
+    '<div class="admin-section-label" style="margin:18px 0 10px;font-size:14px;">'+t('admin_add_anime')+'</div>'+
+    '<div class="admin-users">'+
+      '<div style="font-size:11px;color:var(--text2);margin-bottom:10px;">'+t('aa_title')+'</div>'+
+      '<input type="text" id="aa-title" placeholder="'+t('aa_title_ph')+'" style="width:100%;background:var(--glass2);border:1px solid var(--border2);border-radius:10px;padding:10px 12px;color:var(--text);font-size:13px;font-family:inherit;margin-bottom:10px;">'+
+      '<div style="display:flex;gap:10px;margin-bottom:10px;">'+
+        '<input type="number" id="aa-year" placeholder="'+t('aa_year')+'" style="flex:1;background:var(--glass2);border:1px solid var(--border2);border-radius:10px;padding:10px 12px;color:var(--text);font-size:13px;font-family:inherit;">'+
+        '<input type="text" id="aa-score" placeholder="'+t('aa_score')+'" style="flex:1;background:var(--glass2);border:1px solid var(--border2);border-radius:10px;padding:10px 12px;color:var(--text);font-size:13px;font-family:inherit;">'+
+        '<select id="aa-format" style="flex:1;background:var(--glass2);border:1px solid var(--border2);border-radius:10px;padding:10px 12px;color:var(--text);font-size:13px;font-family:inherit;">'+
+          '<option value="TV">TV</option><option value="Movie">Movie</option><option value="OVA">OVA</option>'+
+        '</select>'+
+      '</div>'+
+      '<input type="text" id="aa-genres" placeholder="'+t('aa_genres_ph')+'" style="width:100%;background:var(--glass2);border:1px solid var(--border2);border-radius:10px;padding:10px 12px;color:var(--text);font-size:13px;font-family:inherit;margin-bottom:10px;">'+
+      '<textarea id="aa-desc" placeholder="'+t('aa_desc_ph')+'" class="report-textarea" style="margin-bottom:14px;"></textarea>'+
+      '<div id="aa-episodes"></div>'+
+      '<button class="edit-btn" style="margin-bottom:14px;" onclick="aaAddEpisodeRow()">'+t('aa_add_ep')+'</button>'+
+      '<button class="shop-buy-btn" onclick="adminSubmitAnime()">'+t('aa_save')+'</button>'+
+    '</div>'+
+    '<div class="admin-section-label" style="margin:18px 0 10px;font-size:14px;">'+t('aa_my_anime')+'</div>'+
+    '<div class="admin-users" id="admin-custom-anime"></div>'+
     '<div class="admin-section-label" style="margin:18px 0 10px;font-size:14px;">'+t('admin_reports')+'</div>'+
     '<div class="admin-users" id="admin-reports"></div>'+
     '<div class="admin-section-label" style="margin:18px 0 10px;font-size:14px;">'+t('admin_donations')+'</div>'+
@@ -2204,6 +2333,8 @@ function renderAdmin() {
   var locale = lang==='en' ? 'en-US' : 'mn-MN';
   renderAdminReports();
   renderAdminDonations();
+  aaResetForm();
+  renderAdminCustomAnime();
 
   db.collection('users').get().then(function(snap) {
     var users = [];
@@ -2312,6 +2443,9 @@ var ANIME_LIST = [
       {num:2, title:'Тэр өдөр', vid:'SKhyFLBNurs', thumb:'https://i.ytimg.com/vi/SKhyFLBNurs/mqdefault.jpg'},
       {num:3, title:'Намар', vid:'MWKcW14-HQY', thumb:'https://i.ytimg.com/vi/MWKcW14-HQY/mqdefault.jpg'},
       {num:4, title:'Цэргийн бэлтгэл', vid:'lhE4MZtKGKM', thumb:'https://i.ytimg.com/vi/lhE4MZtKGKM/mqdefault.jpg'},
+      {num:5, title:'Анхны тулаан', vid:'CO_ytccKgck', thumb:'https://i.ytimg.com/vi/CO_ytccKgck/mqdefault.jpg'},
+      {num:6, title:'Дэлхийн харагдсан зураг', vid:'f1YO_8SVJNA', thumb:'https://i.ytimg.com/vi/f1YO_8SVJNA/mqdefault.jpg'},
+      {num:7, title:'Жижиг ир', vid:'FU6a6XpdBbc', thumb:'https://i.ytimg.com/vi/FU6a6XpdBbc/mqdefault.jpg'},
     ]},
   { id:'slime', title:'That Time I Got Reincarnated as a Slime', score:'8.2', format:'TV', year:2018,
     desc:'37 насны офисын ажилтан өөр ертөнцөд Слайм болон дахин төрдөг.',
@@ -2344,6 +2478,18 @@ var ANIME_LIST = [
     ]},
 ];
 
+var CUSTOM_ANIME_LIST = [];
+function getAnimeList(){ return ANIME_LIST.concat(CUSTOM_ANIME_LIST); }
+function loadCustomAnime() {
+  db.collection('customAnime').get().then(function(snap){
+    CUSTOM_ANIME_LIST = [];
+    snap.forEach(function(doc){ var d = doc.data(); d.docId = doc.id; CUSTOM_ANIME_LIST.push(d); });
+    if (document.getElementById('history-row')) renderHistoryRow();
+    if (document.getElementById('rec-row')) renderRecommendations();
+    if (document.getElementById('admin-custom-anime')) renderAdminCustomAnime();
+  }).catch(function(){});
+}
+
 var curAnime = null;
 var curEpIdx = 0;
 
@@ -2373,7 +2519,7 @@ var MN_TO_EN_GENRE = {
 function renderRecommendations() {
   var sec = document.getElementById('rec-sec');
   if (!sec) return;
-  var watched = (watchHistory||[]).map(function(id){ return ANIME_LIST.filter(function(a){return a.id===id;})[0]; }).filter(Boolean);
+  var watched = (watchHistory||[]).map(function(id){ return getAnimeList().filter(function(a){return a.id===id;})[0]; }).filter(Boolean);
   if (watched.length === 0) { sec.style.display='none'; return; }
   var counts = {};
   watched.forEach(function(a){
@@ -2411,7 +2557,7 @@ function makeLocalCard(a) {
 function renderHistoryRow() {
   var sec = document.getElementById('history-sec');
   if (!sec) return;
-  var items = (watchHistory||[]).filter(function(id){ return ANIME_LIST.some(function(a){return a.id===id;}); });
+  var items = (watchHistory||[]).filter(function(id){ return getAnimeList().some(function(a){return a.id===id;}); });
   if (items.length === 0) { sec.style.display='none'; return; }
   items.sort(function(a,b){
     var la = (watchStats[a] && watchStats[a].last) || '';
@@ -2420,13 +2566,13 @@ function renderHistoryRow() {
   });
   sec.style.display='block';
   document.getElementById('history-row').innerHTML = items.map(function(id){
-    var a = ANIME_LIST.filter(function(x){return x.id===id;})[0];
+    var a = getAnimeList().filter(function(x){return x.id===id;})[0];
     return makeLocalCard(a);
   }).join('');
 }
 
 function openAnimePlayer(id, epIdx) {
-  var a = ANIME_LIST.filter(function(x){return x.id===id;})[0];
+  var a = getAnimeList().filter(function(x){return x.id===id;})[0];
   if (!a) return;
   curAnime = a; curEpIdx = epIdx;
   // Track history
@@ -2593,11 +2739,13 @@ function openModal(id) {
     if(a.bannerImage){document.getElementById('mb').insertAdjacentHTML('afterbegin','<img src="'+a.bannerImage+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">');}
     var gHTML=(a.genres||[]).slice(0,5).map(function(g){return '<span class="mg">'+GT(g)+'</span>';}).join('');
     var trHTML=(a.trailer&&a.trailer.site==='youtube')?'<div class="trailer-w"><iframe src="https://www.youtube.com/embed/'+a.trailer.id+'?rel=0" allowfullscreen></iframe></div>':'';
+    var localMatch = getAnimeList().filter(function(x){ return x.title===ttl || x.title===(a.title.romaji||''); })[0];
+    var watchAction = localMatch ? "closeModal();openAnimePlayer('"+localMatch.id+"',0)" : "toast(t('not_yet'))";
     document.getElementById('modal-body').innerHTML=
       '<div class="mt">'+ttl+'</div><div class="me2">'+(a.title.native||a.title.romaji)+'</div>'+
       '<div class="mstats"><div class="ms">'+t('rating')+': <span>⭐ '+sc+'</span></div><div class="ms">'+t('episodes_l')+': <span>'+(a.episodes||'?')+'</span></div><div class="ms">'+t('year_l')+': <span>'+(a.seasonYear||'?')+'</span></div></div>'+
       '<div class="mgenres">'+gHTML+'</div><div class="mdesc">'+desc+'</div>'+
-      '<div class="mactions"><button class="btn-a pu" style="flex:1;" onclick="closeModal();goPage(\'anime\')">'+t('watch_anime_btn')+'</button><button class="btn-sec" onclick="toggleWL('+a.id+',this)">'+(inWL?t('in_wl'):t('add_wl'))+'</button></div>'+trHTML;
+      '<div class="mactions"><button class="btn-a pu" style="flex:1;" onclick="'+watchAction+'">'+t('watch_anime_btn')+'</button><button class="btn-sec" onclick="toggleWL('+a.id+',this)">'+(inWL?t('in_wl'):t('add_wl'))+'</button></div>'+trHTML;
   }).catch(function(err){ console.error('openModal',err); document.getElementById('modal-body').innerHTML='<div class="r-info">'+t('retry')+'</div>'; });
 }
 
@@ -2795,6 +2943,7 @@ enableRowScroll();
 renderHistoryRow();
 renderRecommendations();
 renderTopFans();
+loadCustomAnime();
 loadTrending();
 loadTop();
 // Анх ачаалахад auth төлөв тогтсоны дараа нэвтрээгүй бол login харуулах
